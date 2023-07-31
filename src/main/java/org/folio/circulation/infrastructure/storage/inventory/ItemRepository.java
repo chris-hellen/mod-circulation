@@ -23,6 +23,7 @@ import java.lang.invoke.MethodHandles;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -83,7 +84,7 @@ public class ItemRepository {
   }
 
   public CompletableFuture<Result<Item>> updateItem(Item item) {
-    log.debug("updateItem:: parameters item: {}", item);
+    log.info("updateItem:: parameters item: {}", item);
 
     final String IN_TRANSIT_DESTINATION_SERVICE_POINT_ID = "inTransitDestinationServicePointId";
 
@@ -101,7 +102,7 @@ public class ItemRepository {
 
     write(updatedItemRepresentation, STATUS_PROPERTY,
       new JsonObject().put("name", item.getStatus().getValue()));
-
+    log.info("item status {} ", item.getStatus().getValue());
     remove(updatedItemRepresentation, IN_TRANSIT_DESTINATION_SERVICE_POINT_ID);
     write(updatedItemRepresentation, IN_TRANSIT_DESTINATION_SERVICE_POINT_ID,
       item.getInTransitDestinationServicePointId());
@@ -250,11 +251,23 @@ public class ItemRepository {
 
     final var finder = createItemFinder();
     final var mapper = new ItemMapper();
-
-    return finder.findByQuery(exactMatch("barcode", barcode), one())
-      .thenApply(records -> records.map(MultipleRecords::firstOrNull))
+//
+//    return finder.findByQuery(exactMatch("barcode", barcode), one())
+//      .thenApply(records -> records.map(MultipleRecords::firstOrNull))
+    return CompletableFuture.completedFuture(Result.succeeded(createJsonObject(barcode)))
       .thenApply(mapResult(identityMap::add))
       .thenApply(mapResult(mapper::toDomain));
+  }
+
+  private JsonObject createJsonObject(String barcode) {
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.put("id", "c50cd9e5-cf05-4e33-8db9-62ccfa849a41");
+    jsonObject.put("barcode", barcode);
+    jsonObject.put("holdingsRecordId", "cc04a18a-5073-490f-9808-be6c0e7a4b75");
+    jsonObject.put("materialTypeId", "71fbd940-1027-40a6-8a48-49b44d795e46");
+    jsonObject.put("permanentLoanTypeId", "5f52d8c0-d893-47a6-95e1-e86205f9f5f4");
+    jsonObject.put("effectiveLocationId", "0e1ab629-ae20-4f85-893c-3cf77954c1a8");
+    return jsonObject;
   }
 
   public <T extends ItemRelatedRecord> CompletableFuture<Result<MultipleRecords<T>>>
@@ -355,7 +368,13 @@ public class ItemRepository {
     if (item.getLoanTypeId() == null) {
       return completedFuture(succeeded(LoanType.unknown()));
     }
-
+    try {
+      log.info("fetch loan type :: {} ", loanTypeRepository.fetchById(item.getLoanTypeId()).get().value());
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    } catch (ExecutionException e) {
+      throw new RuntimeException(e);
+    }
     return loanTypeRepository.fetchById(item.getLoanTypeId());
   }
 
