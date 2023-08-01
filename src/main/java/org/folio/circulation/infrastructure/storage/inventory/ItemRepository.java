@@ -21,12 +21,15 @@ import static org.folio.circulation.support.utils.LogUtil.multipleRecordsAsStrin
 
 import java.lang.invoke.MethodHandles;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.circulation.domain.Holdings;
@@ -52,7 +55,7 @@ import org.folio.circulation.support.results.Result;
 import io.vertx.core.json.JsonObject;
 import lombok.AllArgsConstructor;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ItemRepository {
   private static final Logger log = LogManager.getLogger(MethodHandles.lookup().lookupClass());
 
@@ -64,6 +67,7 @@ public class ItemRepository {
   private final LoanTypeRepository loanTypeRepository;
   private final IdentityMap identityMap = new IdentityMap(
     item -> getProperty(item, "id"));
+  private Map<String, String> hMap = new HashMap<>();
 
   public ItemRepository(Clients clients) {
     this(clients.itemsStorage(), LocationRepository.using(clients,
@@ -115,7 +119,7 @@ public class ItemRepository {
     else {
       write(updatedItemRepresentation, LAST_CHECK_IN, lastCheckIn.toJson());
     }
-
+    log.info("updatedItemRepresentation {} ", updatedItemRepresentation);
     return itemsClient.put(item.getItemId(), updatedItemRepresentation)
       .thenApply(noContentRecordInterpreter(item)::flatMap)
       .thenCompose(x -> ofAsync(() -> item));
@@ -261,7 +265,10 @@ public class ItemRepository {
 
   private JsonObject createJsonObject(String barcode) {
     JsonObject jsonObject = new JsonObject();
-    jsonObject.put("id", UUID.randomUUID().toString());
+    if(hMap.get(barcode) == null) {
+      hMap.put(barcode, UUID.randomUUID().toString());
+    }
+    jsonObject.put("id", hMap.get(barcode));
     jsonObject.put("barcode", barcode);
     jsonObject.put("holdingsRecordId", UUID.randomUUID().toString());
     jsonObject.put("materialTypeId", UUID.randomUUID().toString());
