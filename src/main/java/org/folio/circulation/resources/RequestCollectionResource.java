@@ -8,6 +8,9 @@ import static org.folio.circulation.support.results.AsynchronousResult.fromFutur
 import static org.folio.circulation.support.results.MappingFunctions.toFixedValue;
 import static org.folio.circulation.support.results.MappingFunctions.when;
 
+import java.lang.invoke.MethodHandles;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.circulation.domain.CreateRequestService;
 import org.folio.circulation.domain.MoveRequestProcessAdapter;
 import org.folio.circulation.domain.MoveRequestService;
@@ -56,6 +59,9 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 
 public class RequestCollectionResource extends CollectionResource {
+  private static final Logger log = LogManager.getLogger(
+    MethodHandles.lookup().lookupClass());
+
   public RequestCollectionResource(HttpClient client) {
     super(client, "/circulation/requests");
   }
@@ -74,7 +80,7 @@ public class RequestCollectionResource extends CollectionResource {
     final var representation = routingContext.getBodyAsJson();
 
     final var eventPublisher = new EventPublisher(routingContext);
-
+    log.info("create:: context user Id: {}", context.getUserId());
     RequestRelatedRepositories repositories = new RequestRelatedRepositories(clients);
     final var itemRepository = repositories.getItemRepository();
     final var loanRepository = repositories.getLoanRepository();
@@ -128,7 +134,7 @@ public class RequestCollectionResource extends CollectionResource {
     final var representation = routingContext.getBodyAsJson();
 
     write(representation, "id", getRequestId(routingContext));
-
+    log.info("replace:: context user Id: {}", context.getUserId());
     RequestRelatedRepositories repositories = new RequestRelatedRepositories(clients);
     final var itemRepository = repositories.getItemRepository();
     final var loanRepository = repositories.getLoanRepository();
@@ -261,6 +267,7 @@ public class RequestCollectionResource extends CollectionResource {
     final var representation = routingContext.getBodyAsJson();
 
     final var id = getRequestId(routingContext);
+    log.info("move:: context user Id: {}", context.getUserId());
 
     final var itemRepository = new ItemRepository(clients);
     final var userRepository = new UserRepository(clients);

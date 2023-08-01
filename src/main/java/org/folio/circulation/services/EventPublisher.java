@@ -19,6 +19,7 @@ import static org.folio.circulation.domain.representations.logs.CirculationCheck
 import static org.folio.circulation.domain.representations.logs.CirculationCheckInCheckOutLogEventMapper.mapToCheckOutLogEventContent;
 import static org.folio.circulation.domain.representations.logs.LogEventPayloadField.LOG_EVENT_TYPE;
 import static org.folio.circulation.domain.representations.logs.LogEventPayloadField.PAYLOAD;
+import static org.folio.circulation.domain.representations.logs.LogEventPayloadField.SOURCE;
 import static org.folio.circulation.domain.representations.logs.LogEventType.LOAN;
 import static org.folio.circulation.domain.representations.logs.LogEventType.NOTICE;
 import static org.folio.circulation.domain.representations.logs.LogEventType.NOTICE_ERROR;
@@ -31,6 +32,7 @@ import static org.folio.circulation.support.results.Result.succeeded;
 import static org.folio.circulation.support.utils.ClockUtil.getZonedDateTime;
 import static org.folio.circulation.support.utils.DateFormatUtil.formatDateTimeOptional;
 
+import java.lang.invoke.MethodHandles;
 import java.util.concurrent.CompletableFuture;
 
 import org.apache.logging.log4j.LogManager;
@@ -61,6 +63,7 @@ import io.vertx.ext.web.RoutingContext;
 
 public class EventPublisher {
 
+  private static final Logger log = LogManager.getLogger(MethodHandles.lookup().lookupClass());
 
   private static final Logger logger = LogManager.getLogger(EventPublisher.class);
 
@@ -193,6 +196,7 @@ public class EventPublisher {
   }
 
   private CompletableFuture<Result<Loan>> publishDueDateChangedEvent(Loan loan, RequestAndRelatedRecords records) {
+    log.info("publishDueDateChangedEvent:: loan: {}, records: {}", loan, records);
     if (records.getRecalledLoanPreviousDueDate() != null) {
       loan.setPreviousDueDate(records.getRecalledLoanPreviousDueDate());
     }
@@ -206,7 +210,7 @@ public class EventPublisher {
       write(payloadJsonObject, LOAN_ID_FIELD, loan.getId());
       write(payloadJsonObject, DUE_DATE_FIELD, loan.getDueDate());
       write(payloadJsonObject, DUE_DATE_CHANGED_BY_RECALL_FIELD, loan.wasDueDateChangedByRecall());
-
+      write(payloadJsonObject, SOURCE.value(), "source");
       runAsync(() -> publishDueDateLogEvent(loan));
       if (renewalContext) {
         runAsync(() -> publishRenewedEvent(loan.copy().withUser(user)));
@@ -224,7 +228,7 @@ public class EventPublisher {
 
   public CompletableFuture<Result<LoanAndRelatedRecords>> publishDueDateChangedEvent(
     LoanAndRelatedRecords loanAndRelatedRecords) {
-
+    log.info("publishDueDateChangedEvent:: records: {}", loanAndRelatedRecords);
     if (loanAndRelatedRecords.getLoan() != null) {
       Loan loan = loanAndRelatedRecords.getLoan();
       publishDueDateChangedEvent(loan, loan.getUser(), false);
@@ -235,7 +239,7 @@ public class EventPublisher {
 
   public CompletableFuture<Result<RenewalContext>> publishDueDateChangedEvent(
     RenewalContext renewalContext) {
-
+    log.info("publishDueDateChangedEvent:: renewalContext: {}", renewalContext);
     var loan = renewalContext.getLoan();
 
     publishDueDateChangedEvent(loan, loan.getUser(), true);
@@ -245,7 +249,7 @@ public class EventPublisher {
 
   public CompletableFuture<Result<RequestAndRelatedRecords>> publishDueDateChangedEvent(
     RequestAndRelatedRecords requestAndRelatedRecords, LoanRepository loanRepository) {
-
+    log.info("publishDueDateChangedEvent:: records: {}, repo: {}", requestAndRelatedRecords, loanRepository);
     return loanRepository.findOpenLoanForRequest(requestAndRelatedRecords.getRequest())
       .thenCompose(r -> r.after(loan -> {
         if (loan != null) {
