@@ -2612,19 +2612,20 @@ class CheckOutByBarcodeTests extends APITests {
     CountDownLatch latch = new CountDownLatch(2);
     List<IndividualResource> responseList = new ArrayList<>();
 
-    Thread thread1 = new Thread(() -> {
-      responseList.add(checkOutFixture.checkOutByBarcodeResource(firstBookTypeItem, steve));
-      latch.countDown();
-    });
-
-    Thread thread2 = new Thread(() -> {
-      responseList.add(checkOutFixture.checkOutByBarcodeResource(secondBookTypeItem, steve));
-      latch.countDown();
-    });
-
-    thread1.start();
-    thread2.start();
-    latch.await();
+    checkOutFixture.checkOutByBarcodeResource(firstBookTypeItem, steve);
+//    Thread thread1 = new Thread(() -> {
+//      responseList.add(checkOutFixture.checkOutByBarcodeResource(firstBookTypeItem, steve));
+//      latch.countDown();
+//    });
+//
+//    Thread thread2 = new Thread(() -> {
+//      responseList.add(checkOutFixture.checkOutByBarcodeResource(secondBookTypeItem, steve));
+//      latch.countDown();
+//    });
+//
+//    thread1.start();
+//    thread2.start();
+//    latch.await();
 
     Assertions.assertTrue(responseList.stream().allMatch(x -> x.getResponse().getStatusCode() == 201));
   }

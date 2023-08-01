@@ -263,9 +263,9 @@ public class ItemRepository {
     JsonObject jsonObject = new JsonObject();
     jsonObject.put("id", "c50cd9e5-cf05-4e33-8db9-62ccfa849a41");
     jsonObject.put("barcode", barcode);
-    jsonObject.put("holdingsRecordId", "cc04a18a-5073-490f-9808-be6c0e7a4b75");
+    jsonObject.put("holdingsRecordId", "cc04a18a-5073-490f-9808-be6c0e7a4b80");
     jsonObject.put("materialTypeId", "71fbd940-1027-40a6-8a48-49b44d795e46");
-    jsonObject.put("permanentLoanTypeId", "5f52d8c0-d893-47a6-95e1-e86205f9f5f4");
+    jsonObject.put("permanentLoanTypeId", "792f1f46-7b5b-40ee-a1df-2ddfd0baa4c3");
     jsonObject.put("effectiveLocationId", "0e1ab629-ae20-4f85-893c-3cf77954c1a8");
     return jsonObject;
   }

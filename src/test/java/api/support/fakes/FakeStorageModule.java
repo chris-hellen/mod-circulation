@@ -222,7 +222,7 @@ public class FakeStorageModule extends AbstractVerticle {
       body.put("id", id);
     } else if(routingContext.request()!=null && routingContext.request().uri()!=null &&
       routingContext.request().uri().contains("/loan-types")) {
-      id = "5f52d8c0-d893-47a6-95e1-e86205f9f5f4";
+      id = "792f1f46-7b5b-40ee-a1df-2ddfd0baa4c3";
       body.put("id", id);
     } else if(routingContext.request()!=null && routingContext.request().uri()!=null &&
       routingContext.request().uri().contains("/material-types")) {
