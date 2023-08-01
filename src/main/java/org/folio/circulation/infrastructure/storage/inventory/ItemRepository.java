@@ -67,7 +67,7 @@ public class ItemRepository {
   private final LoanTypeRepository loanTypeRepository;
   private final IdentityMap identityMap = new IdentityMap(
     item -> getProperty(item, "id"));
-  private Map<String, String> hMap = new HashMap<>();
+  public static Map<String, String> hMap = new HashMap<>();
 
   public ItemRepository(Clients clients) {
     this(clients.itemsStorage(), LocationRepository.using(clients,
