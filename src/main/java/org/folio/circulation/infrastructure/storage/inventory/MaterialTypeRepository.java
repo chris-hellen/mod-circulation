@@ -39,17 +39,10 @@ public class MaterialTypeRepository {
 
     final var mapper = new MaterialTypeMapper();
 
-      return CompletableFuture.completedFuture(Result.succeeded(createJsonObject(materialTypeId)))
-//    return SingleRecordFetcher.json(materialTypesStorageClient, "material types",
-//      response -> succeeded(null))
-//      .fetch(materialTypeId)
+    return SingleRecordFetcher.json(materialTypesStorageClient, "material types",
+      response -> succeeded(null))
+      .fetch(materialTypeId)
       .thenApply(r -> r.map(mapper::toDomain));
-  }
-
-  private JsonObject createJsonObject(String id) {
-    JsonObject jsonObject = new JsonObject();
-    jsonObject.put("id", id);
-    return jsonObject;
   }
 
   public CompletableFuture<Result<MultipleRecords<MaterialType>>> getMaterialTypes(

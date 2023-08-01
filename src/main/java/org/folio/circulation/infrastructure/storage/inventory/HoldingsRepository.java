@@ -33,16 +33,10 @@ public class HoldingsRepository {
   }
 
   public CompletableFuture<Result<JsonObject>> fetchAsJson(String id) {
-    return CompletableFuture.completedFuture(Result.succeeded(createJsonObject(id)));
-//    return SingleRecordFetcher.json(holdingsClient, "holdings",
-//        r -> failedValidation("Holdings record does not exist", "id", id))
-//      .fetch(id);
-  }
 
-  private JsonObject createJsonObject(String id) {
-    JsonObject jsonObject = new JsonObject();
-    jsonObject.put("id", id);
-    return jsonObject;
+    return SingleRecordFetcher.json(holdingsClient, "holdings",
+        r -> failedValidation("Holdings record does not exist", "id", id))
+      .fetch(id);
   }
 
   CompletableFuture<Result<MultipleRecords<Holdings>>> fetchByInstanceId(String instanceId) {

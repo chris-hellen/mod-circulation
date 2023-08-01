@@ -332,6 +332,11 @@ public class Item {
     return itemRepresentation != null;
   }
 
+  public boolean isDcbItem() {
+    return itemRepresentation !=null && itemRepresentation
+      .getBoolean("isDcbItem", false).equals(true);
+  }
+
   public LastCheckIn getLastCheckIn() {
     return lastCheckIn;
   }

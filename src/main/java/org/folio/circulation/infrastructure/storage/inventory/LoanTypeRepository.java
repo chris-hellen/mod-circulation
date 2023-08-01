@@ -24,18 +24,11 @@ public class LoanTypeRepository {
 
   public CompletableFuture<Result<LoanType>> fetchById(String id) {
     final var mapper = new LoanTypeMapper();
-      return CompletableFuture.completedFuture(Result.succeeded(createJsonObject(id)))
-//    return SingleRecordFetcher.json(loanTypesClient,
-//        "loan types",
-//        response -> succeeded(null))
-//      .fetch(id)
+    return SingleRecordFetcher.json(loanTypesClient,
+        "loan types",
+        response -> succeeded(null))
+      .fetch(id)
       .thenApply(mapResult(mapper::toDomain));
-  }
-
-  private JsonObject createJsonObject(String id) {
-    JsonObject jsonObject = new JsonObject();
-    jsonObject.put("id", id);
-    return jsonObject;
   }
 
   CompletableFuture<Result<MultipleRecords<LoanType>>> findByIds(Set<String> ids) {

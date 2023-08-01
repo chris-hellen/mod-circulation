@@ -270,10 +270,11 @@ public class ItemRepository {
     }
     jsonObject.put("id", hMap.get(barcode));
     jsonObject.put("barcode", barcode);
-    jsonObject.put("holdingsRecordId", UUID.randomUUID().toString());
+ //   jsonObject.put("holdingsRecordId", UUID.randomUUID().toString());
     jsonObject.put("materialTypeId", UUID.randomUUID().toString());
     jsonObject.put("permanentLoanTypeId", UUID.randomUUID().toString());
     jsonObject.put("effectiveLocationId", UUID.randomUUID().toString());
+    jsonObject.put("isDcbItem", true);
     return jsonObject;
   }
 
@@ -345,6 +346,10 @@ public class ItemRepository {
   }
 
   public CompletableFuture<Result<Item>> fetchItemRelatedRecords(Result<Item> itemResult) {
+    if(itemResult.value().isDcbItem()) {
+      return CompletableFuture.completedFuture(itemResult);
+    }
+
     return itemResult.combineAfter(this::fetchHoldingsRecord, Item::withHoldings)
       .thenComposeAsync(combineAfter(this::fetchInstance, Item::withInstance))
       .thenComposeAsync(combineAfter(locationRepository::getEffectiveLocation, Item::withLocation))
