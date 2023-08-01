@@ -22,8 +22,8 @@ import static org.folio.circulation.support.utils.LogUtil.multipleRecordsAsStrin
 import java.lang.invoke.MethodHandles;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -261,12 +261,12 @@ public class ItemRepository {
 
   private JsonObject createJsonObject(String barcode) {
     JsonObject jsonObject = new JsonObject();
-    jsonObject.put("id", "c50cd9e5-cf05-4e33-8db9-62ccfa849a41");
+    jsonObject.put("id", UUID.randomUUID().toString());
     jsonObject.put("barcode", barcode);
-    jsonObject.put("holdingsRecordId", "cc04a18a-5073-490f-9808-be6c0e7a4b80");
-    jsonObject.put("materialTypeId", "71fbd940-1027-40a6-8a48-49b44d795e46");
-    jsonObject.put("permanentLoanTypeId", "792f1f46-7b5b-40ee-a1df-2ddfd0baa4c3");
-    jsonObject.put("effectiveLocationId", "0e1ab629-ae20-4f85-893c-3cf77954c1a8");
+    jsonObject.put("holdingsRecordId", UUID.randomUUID().toString());
+    jsonObject.put("materialTypeId", UUID.randomUUID().toString());
+    jsonObject.put("permanentLoanTypeId", UUID.randomUUID().toString());
+    jsonObject.put("effectiveLocationId", UUID.randomUUID().toString());
     return jsonObject;
   }
 
@@ -367,13 +367,6 @@ public class ItemRepository {
   private CompletableFuture<Result<LoanType>> fetchLoanType(Item item) {
     if (item.getLoanTypeId() == null) {
       return completedFuture(succeeded(LoanType.unknown()));
-    }
-    try {
-      log.info("fetch loan type :: {} ", loanTypeRepository.fetchById(item.getLoanTypeId()).get().value());
-    } catch (InterruptedException e) {
-      throw new RuntimeException(e);
-    } catch (ExecutionException e) {
-      throw new RuntimeException(e);
     }
     return loanTypeRepository.fetchById(item.getLoanTypeId());
   }

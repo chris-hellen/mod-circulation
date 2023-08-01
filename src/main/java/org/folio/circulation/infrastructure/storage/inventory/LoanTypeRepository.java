@@ -7,6 +7,7 @@ import static org.folio.circulation.support.results.ResultBinding.mapResult;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
+import io.vertx.core.json.JsonObject;
 import org.folio.circulation.domain.LoanType;
 import org.folio.circulation.domain.MultipleRecords;
 import org.folio.circulation.storage.mappers.LoanTypeMapper;
@@ -23,12 +24,18 @@ public class LoanTypeRepository {
 
   public CompletableFuture<Result<LoanType>> fetchById(String id) {
     final var mapper = new LoanTypeMapper();
-
-    return SingleRecordFetcher.json(loanTypesClient,
-        "loan types",
-        response -> succeeded(null))
-      .fetch(id)
+      return CompletableFuture.completedFuture(Result.succeeded(createJsonObject(id)))
+//    return SingleRecordFetcher.json(loanTypesClient,
+//        "loan types",
+//        response -> succeeded(null))
+//      .fetch(id)
       .thenApply(mapResult(mapper::toDomain));
+  }
+
+  private JsonObject createJsonObject(String id) {
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.put("id", id);
+    return jsonObject;
   }
 
   CompletableFuture<Result<MultipleRecords<LoanType>>> findByIds(Set<String> ids) {

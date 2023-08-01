@@ -20,6 +20,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
+import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.circulation.domain.Campus;
@@ -111,10 +112,17 @@ public class LocationRepository {
       return ofAsync(() -> Location.unknown(null));
     }
 
-    return SingleRecordFetcher.json(locationsStorageClient, "location",
-      response -> succeeded(null))
-      .fetch(id)
+    return CompletableFuture.completedFuture(Result.succeeded(createJsonObject(id)))
+//    return SingleRecordFetcher.json(locationsStorageClient, "location",
+//      response -> succeeded(null))
+//      .fetch(id)
       .thenApply(r -> r.map(new LocationMapper()::toDomain));
+  }
+
+  private JsonObject createJsonObject(String id) {
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.put("id", id);
+    return jsonObject;
   }
 
   public CompletableFuture<Result<Map<String, Location>>> getItemLocations(

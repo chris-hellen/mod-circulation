@@ -8,6 +8,7 @@ import static org.folio.circulation.support.utils.LogUtil.multipleRecordsAsStrin
 import java.lang.invoke.MethodHandles;
 import java.util.concurrent.CompletableFuture;
 
+import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.circulation.domain.Item;
@@ -38,10 +39,17 @@ public class MaterialTypeRepository {
 
     final var mapper = new MaterialTypeMapper();
 
-    return SingleRecordFetcher.json(materialTypesStorageClient, "material types",
-      response -> succeeded(null))
-      .fetch(materialTypeId)
+      return CompletableFuture.completedFuture(Result.succeeded(createJsonObject(materialTypeId)))
+//    return SingleRecordFetcher.json(materialTypesStorageClient, "material types",
+//      response -> succeeded(null))
+//      .fetch(materialTypeId)
       .thenApply(r -> r.map(mapper::toDomain));
+  }
+
+  private JsonObject createJsonObject(String id) {
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.put("id", id);
+    return jsonObject;
   }
 
   public CompletableFuture<Result<MultipleRecords<MaterialType>>> getMaterialTypes(
