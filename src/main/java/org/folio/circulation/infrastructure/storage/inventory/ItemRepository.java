@@ -46,6 +46,8 @@ import org.folio.circulation.infrastructure.storage.ServicePointRepository;
 import org.folio.circulation.storage.mappers.HoldingsMapper;
 import org.folio.circulation.storage.mappers.InstanceMapper;
 import org.folio.circulation.storage.mappers.ItemMapper;
+import org.folio.circulation.storage.mappers.LocationMapper;
+import org.folio.circulation.storage.mappers.MaterialTypeMapper;
 import org.folio.circulation.support.Clients;
 import org.folio.circulation.support.CollectionResourceClient;
 import org.folio.circulation.support.ServerErrorFailure;
@@ -132,9 +134,9 @@ public class ItemRepository {
       .thenCompose(x -> ofAsync(() -> item));
   }
 
-  private CompletableFuture<Result<Item>> updateItemStatus(Item item, JsonObject obj) {
+  private CompletableFuture<Result<Item>> updateItemStatus(Item item, JsonObject updatedItem) {
       JsonObject jsonObject = itemMap.get(item.getBarcode());
-      jsonObject.put("status", obj.getJsonObject("status"));
+      jsonObject.put("status", updatedItem.getJsonObject("status"));
       return CompletableFuture.completedFuture(Result.succeeded(item));
   }
 
@@ -376,7 +378,9 @@ public class ItemRepository {
     if(itemResult.value().isDcbItem()) {
       log.info("Item related records will not be fetched for item barcode {} ", itemResult.value().getBarcode());
       return itemResult.combineAfter(this::getHoldings, Item::withHoldings)
-        .thenComposeAsync(combineAfter(this::getInstance, Item::withInstance));
+        .thenComposeAsync(combineAfter(this::getInstance, Item::withInstance))
+        .thenComposeAsync(combineAfter(this::getMaterialType, Item::withMaterialType))
+        .thenComposeAsync(combineAfter(this::getLocation, Item::withLocation));
     }
 
     return itemResult.combineAfter(this::fetchHoldingsRecord, Item::withHoldings)
@@ -389,29 +393,35 @@ public class ItemRepository {
   private CompletableFuture<Result<Holdings>> getHoldings(Item item) {
     log.info("getHoldings:: Fetching holding details for item {} ", item.getBarcode());
     final var mapper = new HoldingsMapper();
-    return completedFuture(succeeded(mapper.toDomain(createHoldingsJson(item.getHoldingsRecordId()))));
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.put("id", item.getHoldingsRecordId());
+    jsonObject.put("instanceId", UUID.randomUUID().toString());
+    return completedFuture(succeeded(mapper.toDomain(jsonObject)));
   }
 
   private CompletableFuture<Result<Instance>> getInstance(Item item) {
     log.info("getInstance:: Fetching instance details for item {} ", item.getBarcode());
     final var mapper = new InstanceMapper();
-    return completedFuture(succeeded(mapper.toDomain(createInstanceJson(item.getInstanceId()))));
-  }
-
-  private JsonObject createHoldingsJson(String id) {
     JsonObject jsonObject = new JsonObject();
-    jsonObject.put("id", id);
-    jsonObject.put("permanentLocationId", UUID.randomUUID().toString());
-    jsonObject.put("callNumber", 123456);
-    jsonObject.put("instanceId", "f595603c-c766-4c59-9d1d-5d0b0e11f557");
-    return jsonObject;
-  }
-
-  private JsonObject createInstanceJson(String id) {
-    JsonObject jsonObject = new JsonObject();
-    jsonObject.put("id", id);
+    jsonObject.put("id", item.getInstanceId());
     jsonObject.put("title", "DCB Item");
-    return jsonObject;
+    return completedFuture(succeeded(mapper.toDomain(jsonObject)));
+  }
+
+  private CompletableFuture<Result<MaterialType>> getMaterialType(Item item) {
+    final var mapper = new MaterialTypeMapper();
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.put("id", item.getMaterialTypeId());
+    jsonObject.put("name", "DCB Material type");
+    return completedFuture(succeeded(mapper.toDomain(jsonObject)));
+  }
+
+  private CompletableFuture<Result<Location>> getLocation(Item item) {
+    final var mapper = new LocationMapper();
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.put("id", item.getMaterialTypeId());
+    jsonObject.put("name", "Dcb Main Library");
+    return completedFuture(succeeded(mapper.toDomain(jsonObject)));
   }
 
   private CompletableFuture<Result<Holdings>> fetchHoldingsRecord(Item item) {
