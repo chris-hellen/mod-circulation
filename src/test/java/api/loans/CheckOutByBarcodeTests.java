@@ -2665,6 +2665,19 @@ class CheckOutByBarcodeTests extends APITests {
       contains("Patron has reached maximum limit of 1 items for loan type")));
   }
 
+  @Test
+  void testDcbItem() throws InterruptedException {
+    final UUID readingRoom = loanTypesFixture.readingRoom().getId();
+
+    circulationRulesFixture.updateCirculationRules(createRules("t " + readingRoom));
+
+    IndividualResource firstBookTypeItem = itemsFixture.createDcbItem(itemBuilder -> itemBuilder.withTemporaryLoanType(readingRoom));
+    IndividualResource steve = usersFixture.steve();
+
+    checkOutFixture.checkOutByBarcodeResource(firstBookTypeItem, steve);
+
+  }
+
   private IndividualResource placeRequest(String requestLevel, ItemResource item,
     IndividualResource requester) {
 

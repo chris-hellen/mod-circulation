@@ -223,6 +223,20 @@ public class ItemsFixture {
         loanTypesFixture.canCirculate().getId()));
   }
 
+  public ItemResource createDcbItem(
+    Function<ItemBuilder, ItemBuilder> additionalItemProperties) {
+
+    return applyAdditionalProperties(
+      identity(),
+      identity(),
+      additionalItemProperties,
+      InstanceExamples.basedUponNod(booksInstanceTypeId(),
+        getPersonalContributorNameTypeId()),
+      thirdFloorHoldings(),
+      ItemExamples.createDcbItem(materialTypesFixture.book().getId(),
+        loanTypesFixture.canCirculate().getId()));
+  }
+
   public ItemResource basedUponTemeraire() {
     return basedUponTemeraire(identity());
   }

@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -43,6 +44,7 @@ import org.folio.circulation.domain.MultipleRecords;
 import org.folio.circulation.infrastructure.storage.IdentityMap;
 import org.folio.circulation.infrastructure.storage.ServicePointRepository;
 import org.folio.circulation.storage.mappers.HoldingsMapper;
+import org.folio.circulation.storage.mappers.InstanceMapper;
 import org.folio.circulation.storage.mappers.ItemMapper;
 import org.folio.circulation.support.Clients;
 import org.folio.circulation.support.CollectionResourceClient;
@@ -68,7 +70,7 @@ public class ItemRepository {
   private final LoanTypeRepository loanTypeRepository;
   private final IdentityMap identityMap = new IdentityMap(
     item -> getProperty(item, "id"));
-  public static Map<String, String> hMap = new HashMap<>();
+  public static Map<String, JsonObject> itemMap = new HashMap<>();
 
   public ItemRepository(Clients clients) {
     this(clients.itemsStorage(), LocationRepository.using(clients,
@@ -120,10 +122,20 @@ public class ItemRepository {
     else {
       write(updatedItemRepresentation, LAST_CHECK_IN, lastCheckIn.toJson());
     }
+    if(item.isDcbItem()) {
+      log.info("updatedItemRepresentation {} ", updatedItemRepresentation);
+      return updateItemStatus(item, updatedItemRepresentation);
+    }
     log.info("updatedItemRepresentation {} ", updatedItemRepresentation);
     return itemsClient.put(item.getItemId(), updatedItemRepresentation)
       .thenApply(noContentRecordInterpreter(item)::flatMap)
       .thenCompose(x -> ofAsync(() -> item));
+  }
+
+  private CompletableFuture<Result<Item>> updateItemStatus(Item item, JsonObject obj) {
+      JsonObject jsonObject = itemMap.get(item.getBarcode());
+      jsonObject.put("status", obj.getJsonObject("status"));
+      return CompletableFuture.completedFuture(Result.succeeded(item));
   }
 
   public CompletableFuture<Result<Item>> getFirstAvailableItemByInstanceId(String instanceId) {
@@ -262,7 +274,13 @@ public class ItemRepository {
         .thenApply(mapResult(identityMap::add))
         .thenApply(mapResult(mapper::toDomain));
     }
-
+    try {
+      log.info(finder.findByQuery(exactMatch("barcode", barcode), one()).get().value().getRecords());
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    } catch (ExecutionException e) {
+      throw new RuntimeException(e);
+    }
     return finder.findByQuery(exactMatch("barcode", barcode), one())
       .thenApply(records -> records.map(MultipleRecords::firstOrNull))
       .thenApply(mapResult(identityMap::add))
@@ -271,17 +289,20 @@ public class ItemRepository {
 
   private JsonObject createJsonObject(String barcode) {
     JsonObject jsonObject = new JsonObject();
-    if(hMap.get(barcode) == null) {
-      hMap.put(barcode, UUID.randomUUID().toString());
+    if(itemMap.get(barcode) == null) {
+      jsonObject.put("id", UUID.randomUUID().toString());
+      jsonObject.put("barcode", barcode);
+      jsonObject.put("holdingsRecordId", UUID.randomUUID().toString());
+      jsonObject.put("materialTypeId", UUID.randomUUID().toString());
+      jsonObject.put("permanentLoanTypeId", UUID.randomUUID().toString());
+      jsonObject.put("effectiveLocationId", UUID.randomUUID().toString());
+      jsonObject.put("isDcbItem", true);
+      JsonObject status = new JsonObject();
+      status.put("name", "Available");
+      jsonObject.put("status", status);
+      itemMap.put(barcode, jsonObject);
     }
-    jsonObject.put("id", hMap.get(barcode));
-    jsonObject.put("barcode", barcode);
-    jsonObject.put("holdingsRecordId", UUID.randomUUID().toString());
-    jsonObject.put("materialTypeId", UUID.randomUUID().toString());
-    jsonObject.put("permanentLoanTypeId", UUID.randomUUID().toString());
-    jsonObject.put("effectiveLocationId", UUID.randomUUID().toString());
-    jsonObject.put("isDcbItem", true);
-    return jsonObject;
+    return itemMap.get(barcode);
   }
 
   public <T extends ItemRelatedRecord> CompletableFuture<Result<MultipleRecords<T>>>
@@ -354,7 +375,8 @@ public class ItemRepository {
   public CompletableFuture<Result<Item>> fetchItemRelatedRecords(Result<Item> itemResult) {
     if(itemResult.value().isDcbItem()) {
       log.info("Item related records will not be fetched for item barcode {} ", itemResult.value().getBarcode());
-      return itemResult.combineAfter(res -> this.getHoldings(res), Item::withHoldings);
+      return itemResult.combineAfter(this::getHoldings, Item::withHoldings)
+        .thenComposeAsync(combineAfter(this::getInstance, Item::withInstance));
     }
 
     return itemResult.combineAfter(this::fetchHoldingsRecord, Item::withHoldings)
@@ -370,12 +392,25 @@ public class ItemRepository {
     return completedFuture(succeeded(mapper.toDomain(createHoldingsJson(item.getHoldingsRecordId()))));
   }
 
+  private CompletableFuture<Result<Instance>> getInstance(Item item) {
+    log.info("getInstance:: Fetching instance details for item {} ", item.getBarcode());
+    final var mapper = new InstanceMapper();
+    return completedFuture(succeeded(mapper.toDomain(createInstanceJson(item.getInstanceId()))));
+  }
+
   private JsonObject createHoldingsJson(String id) {
     JsonObject jsonObject = new JsonObject();
     jsonObject.put("id", id);
     jsonObject.put("permanentLocationId", UUID.randomUUID().toString());
     jsonObject.put("callNumber", 123456);
     jsonObject.put("instanceId", "f595603c-c766-4c59-9d1d-5d0b0e11f557");
+    return jsonObject;
+  }
+
+  private JsonObject createInstanceJson(String id) {
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.put("id", id);
+    jsonObject.put("title", "DCB Item");
     return jsonObject;
   }
 

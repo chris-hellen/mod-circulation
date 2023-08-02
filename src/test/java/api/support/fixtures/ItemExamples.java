@@ -48,6 +48,15 @@ public class ItemExamples {
     return new ItemBuilder()
       .withPermanentLoanType(loanTypeId)
       .withMaterialType(bookMaterialTypeId)
+      .withBarcode("565578437802");
+  }
+
+  public static ItemBuilder createDcbItem(UUID bookMaterialTypeId,
+                                         UUID loanTypeId) {
+
+    return new ItemBuilder()
+      .withPermanentLoanType(loanTypeId)
+      .withMaterialType(bookMaterialTypeId)
       .withBarcode("DcbItem1");
   }
 
