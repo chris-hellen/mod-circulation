@@ -112,17 +112,10 @@ public class LocationRepository {
       return ofAsync(() -> Location.unknown(null));
     }
 
-    return CompletableFuture.completedFuture(Result.succeeded(createJsonObject(id)))
-//    return SingleRecordFetcher.json(locationsStorageClient, "location",
-//      response -> succeeded(null))
-//      .fetch(id)
+    return SingleRecordFetcher.json(locationsStorageClient, "location",
+      response -> succeeded(null))
+      .fetch(id)
       .thenApply(r -> r.map(new LocationMapper()::toDomain));
-  }
-
-  private JsonObject createJsonObject(String id) {
-    JsonObject jsonObject = new JsonObject();
-    jsonObject.put("id", id);
-    return jsonObject;
   }
 
   public CompletableFuture<Result<Map<String, Location>>> getItemLocations(

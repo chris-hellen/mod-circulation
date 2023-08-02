@@ -255,10 +255,15 @@ public class ItemRepository {
 
     final var finder = createItemFinder();
     final var mapper = new ItemMapper();
-//
-//    return finder.findByQuery(exactMatch("barcode", barcode), one())
-//      .thenApply(records -> records.map(MultipleRecords::firstOrNull))
-    return CompletableFuture.completedFuture(Result.succeeded(createJsonObject(barcode)))
+
+    if(barcode.contains("Dcb")) {
+      return CompletableFuture.completedFuture(Result.succeeded(createJsonObject(barcode)))
+        .thenApply(mapResult(identityMap::add))
+        .thenApply(mapResult(mapper::toDomain));
+    }
+
+    return finder.findByQuery(exactMatch("barcode", barcode), one())
+      .thenApply(records -> records.map(MultipleRecords::firstOrNull))
       .thenApply(mapResult(identityMap::add))
       .thenApply(mapResult(mapper::toDomain));
   }
@@ -347,6 +352,7 @@ public class ItemRepository {
 
   public CompletableFuture<Result<Item>> fetchItemRelatedRecords(Result<Item> itemResult) {
     if(itemResult.value().isDcbItem()) {
+      log.info("Item related records will not be fetched for item barcode {} ", itemResult.value().getBarcode());
       return CompletableFuture.completedFuture(itemResult);
     }
 

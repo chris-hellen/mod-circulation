@@ -211,27 +211,9 @@ public class FakeStorageModule extends AbstractVerticle {
     WebContext context = new WebContext(routingContext);
 
     JsonObject body = preProcessBody(null, getJsonFromBody(routingContext));
-    String id = null;
-    if(routingContext.request()!=null && routingContext.request().uri()!=null &&
-    routingContext.request().uri().contains("holdings-storage/holdings")) {
-      id = "cc04a18a-5073-490f-9808-be6c0e7a4b75";
-      body.put("id", id);
-    } else if(routingContext.request()!=null && routingContext.request().uri()!=null &&
-      routingContext.request().uri().contains("locations")) {
-      id = "0e1ab629-ae20-4f85-893c-3cf77954c1a8";
-      body.put("id", id);
-    } else if(routingContext.request()!=null && routingContext.request().uri()!=null &&
-      routingContext.request().uri().contains("/loan-types")) {
-      id = "792f1f46-7b5b-40ee-a1df-2ddfd0baa4c3";
-      body.put("id", id);
-    } else if(routingContext.request()!=null && routingContext.request().uri()!=null &&
-      routingContext.request().uri().contains("/material-types")) {
-      id = "71fbd940-1027-40a6-8a48-49b44d795e46";
-      body.put("id", id);
-    } else{
-      id = body.getString("id", UUID.randomUUID().toString());
-      body.put("id", id);
-    }
+
+    String id = body.getString("id", UUID.randomUUID().toString());
+    body.put("id", id);
 
     final ZonedDateTime now = getZonedDateTime();
 
