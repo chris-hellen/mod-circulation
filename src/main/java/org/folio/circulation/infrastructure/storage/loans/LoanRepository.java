@@ -114,7 +114,7 @@ public class LoanRepository implements GetManyRecordsRepository<Loan> {
   public CompletableFuture<Result<LoanAndRelatedRecords>> updateLoan(
     LoanAndRelatedRecords loanAndRelatedRecords) {
 
-    log.debug("updateLoan:: parameters loanAndRelatedRecords: {}", loanAndRelatedRecords);
+    log.info("updateLoan:: parameters loanAndRelatedRecords: {}", loanAndRelatedRecords);
     Loan loan = loanAndRelatedRecords.getLoan();
     log.info("Loan " + loan.getId() + " prior to update:  " + loan.asJson().toString());
     return updateLoan(loanAndRelatedRecords.getLoan())

@@ -143,6 +143,7 @@ public class LoanCollectionResource extends CollectionResource {
     JsonObject incomingRepresentation = routingContext.getBodyAsJson();
 
     incomingRepresentation.put("id", routingContext.request().getParam("id"));
+    log.info("loanCollectionResource replace:: context: {}", context.getUserId());
 
     final Loan loan = Loan.from(incomingRepresentation);
 

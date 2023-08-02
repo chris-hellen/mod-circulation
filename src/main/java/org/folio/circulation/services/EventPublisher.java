@@ -206,11 +206,10 @@ public class EventPublisher {
   private CompletableFuture<Result<Loan>> publishDueDateChangedEvent(Loan loan, User user, boolean renewalContext) {
     if (loan != null) {
       JsonObject payloadJsonObject = new JsonObject();
-      write(payloadJsonObject, USER_ID_FIELD, loan.getUserId());
+      write(payloadJsonObject, USER_ID_FIELD, loan.getUpdatedByUserId());
       write(payloadJsonObject, LOAN_ID_FIELD, loan.getId());
       write(payloadJsonObject, DUE_DATE_FIELD, loan.getDueDate());
       write(payloadJsonObject, DUE_DATE_CHANGED_BY_RECALL_FIELD, loan.wasDueDateChangedByRecall());
-      write(payloadJsonObject, SOURCE.value(), "source");
       runAsync(() -> publishDueDateLogEvent(loan));
       if (renewalContext) {
         runAsync(() -> publishRenewedEvent(loan.copy().withUser(user)));
