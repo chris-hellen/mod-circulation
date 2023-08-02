@@ -71,6 +71,7 @@ public class LoanCollectionResource extends CollectionResource {
     final Loan loan = Loan.from(incomingRepresentation);
 
     final Clients clients = Clients.create(context, client);
+    log.info("loanCollectionResource create:: context: {}", context.getUserId());
 
     final var itemRepository = new ItemRepository(clients);
     final var userRepository = new UserRepository(clients);
