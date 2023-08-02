@@ -214,7 +214,7 @@ public class EventPublisher {
       if (renewalContext) {
         runAsync(() -> publishRenewedEvent(loan.copy().withUser(user)));
       }
-
+      log.info("publishDueDateChangedEvent:: payloadJsonObject: {}", payloadJsonObject.encodePrettily());
       return pubSubPublishingService.publishEvent(LOAN_DUE_DATE_CHANGED.name(), payloadJsonObject.encode())
         .handle((result, error) -> handlePublishEventError(error, loan));
     }
