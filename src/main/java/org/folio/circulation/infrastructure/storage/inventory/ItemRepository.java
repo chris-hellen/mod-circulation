@@ -42,6 +42,7 @@ import org.folio.circulation.domain.MaterialType;
 import org.folio.circulation.domain.MultipleRecords;
 import org.folio.circulation.infrastructure.storage.IdentityMap;
 import org.folio.circulation.infrastructure.storage.ServicePointRepository;
+import org.folio.circulation.storage.mappers.HoldingsMapper;
 import org.folio.circulation.storage.mappers.ItemMapper;
 import org.folio.circulation.support.Clients;
 import org.folio.circulation.support.CollectionResourceClient;
@@ -275,7 +276,7 @@ public class ItemRepository {
     }
     jsonObject.put("id", hMap.get(barcode));
     jsonObject.put("barcode", barcode);
- //   jsonObject.put("holdingsRecordId", UUID.randomUUID().toString());
+    jsonObject.put("holdingsRecordId", UUID.randomUUID().toString());
     jsonObject.put("materialTypeId", UUID.randomUUID().toString());
     jsonObject.put("permanentLoanTypeId", UUID.randomUUID().toString());
     jsonObject.put("effectiveLocationId", UUID.randomUUID().toString());
@@ -353,7 +354,7 @@ public class ItemRepository {
   public CompletableFuture<Result<Item>> fetchItemRelatedRecords(Result<Item> itemResult) {
     if(itemResult.value().isDcbItem()) {
       log.info("Item related records will not be fetched for item barcode {} ", itemResult.value().getBarcode());
-      return CompletableFuture.completedFuture(itemResult);
+      return itemResult.combineAfter(res -> this.getHoldings(res), Item::withHoldings);
     }
 
     return itemResult.combineAfter(this::fetchHoldingsRecord, Item::withHoldings)
@@ -361,6 +362,21 @@ public class ItemRepository {
       .thenComposeAsync(combineAfter(locationRepository::getEffectiveLocation, Item::withLocation))
       .thenComposeAsync(combineAfter(materialTypeRepository::getFor, Item::withMaterialType))
       .thenComposeAsync(combineAfter(this::fetchLoanType, Item::withLoanType));
+  }
+
+  private CompletableFuture<Result<Holdings>> getHoldings(Item item) {
+    log.info("getHoldings:: Fetching holding details for item {} ", item.getBarcode());
+    final var mapper = new HoldingsMapper();
+    return completedFuture(succeeded(mapper.toDomain(createHoldingsJson(item.getHoldingsRecordId()))));
+  }
+
+  private JsonObject createHoldingsJson(String id) {
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.put("id", id);
+    jsonObject.put("permanentLocationId", UUID.randomUUID().toString());
+    jsonObject.put("callNumber", 123456);
+    jsonObject.put("instanceId", "f595603c-c766-4c59-9d1d-5d0b0e11f557");
+    return jsonObject;
   }
 
   private CompletableFuture<Result<Holdings>> fetchHoldingsRecord(Item item) {
