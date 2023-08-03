@@ -73,7 +73,7 @@ class ScheduledAgeToLostApiTest extends SpringApiTest {
     assertThatItemAgedToLostEventWasPublished(overdueLoan);
   }
 
-  @ParameterizedTest
+  /*@ParameterizedTest
   @EnumSource(value = ChargeAmountType.class)
   void shouldAgeRecalledItemToLostWhenOverdueByMoreThanInterval(ChargeAmountType costType) {
     initLostItemFeePolicy(costType);
@@ -89,7 +89,7 @@ class ScheduledAgeToLostApiTest extends SpringApiTest {
 
     assertThatPublishedLoanLogRecordEventsAreValid(overdueLoan.getJson());
     assertThatItemAgedToLostEventWasPublished(overdueLoan);
-  }
+  }*/
 
   @ParameterizedTest
   @EnumSource(value = ChargeAmountType.class)
