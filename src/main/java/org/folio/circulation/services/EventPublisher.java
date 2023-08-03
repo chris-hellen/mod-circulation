@@ -214,7 +214,7 @@ public class EventPublisher {
         runAsync(() -> publishRenewedEvent(loan.copy().withUser(user)));
       }
       log.info("publishDueDateChangedEvent:: payloadJsonObject: {}", payloadJsonObject.encodePrettily());
-      runAsync(() -> publishDueDateLogEvent(loan.copy().withUser(user)));
+      runAsync(() -> publishDueDateLogEvent(loan));
       return pubSubPublishingService.publishEvent(LOAN_DUE_DATE_CHANGED.name(), payloadJsonObject.encode())
         .handle((result, error) -> handlePublishEventError(error, loan));
     }
@@ -317,6 +317,7 @@ public class EventPublisher {
 
   public CompletableFuture<Result<Void>> publishDueDateLogEvent(Loan loan) {
     return publishLogRecord(LoanLogContext.from(loan)
+      .withUserId(loan.getUpdatedByUserId())
       .withAction(LogContextActionResolver.resolveAction(DUE_DATE_CHANGED.getValue()))
       .withDescription(getLoanDueDateChangeLogMessage(loan)).asJson(), LOAN);
   }
