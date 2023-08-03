@@ -210,11 +210,11 @@ public class EventPublisher {
       write(payloadJsonObject, LOAN_ID_FIELD, loan.getId());
       write(payloadJsonObject, DUE_DATE_FIELD, loan.getDueDate());
       write(payloadJsonObject, DUE_DATE_CHANGED_BY_RECALL_FIELD, loan.wasDueDateChangedByRecall());
-      runAsync(() -> publishDueDateLogEvent(loan.copy().withUser(user)));
       if (renewalContext) {
         runAsync(() -> publishRenewedEvent(loan.copy().withUser(user)));
       }
       log.info("publishDueDateChangedEvent:: payloadJsonObject: {}", payloadJsonObject.encodePrettily());
+      runAsync(() -> publishDueDateLogEvent(loan.copy().withUser(user)));
       return pubSubPublishingService.publishEvent(LOAN_DUE_DATE_CHANGED.name(), payloadJsonObject.encode())
         .handle((result, error) -> handlePublishEventError(error, loan));
     }
