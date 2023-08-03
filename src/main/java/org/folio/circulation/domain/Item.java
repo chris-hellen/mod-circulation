@@ -124,7 +124,7 @@ public class Item {
 
   public String getTitle() {
     if(isDcbItem()) {
-      return itemRepresentation.getString("title");
+      return itemRepresentation.getString("dcbInstanceTitle");
     }
     return instance.getTitle();
   }
@@ -203,7 +203,7 @@ public class Item {
 
   public String getMaterialTypeName() {
     if(isDcbItem()) {
-      return itemRepresentation.getString("materialType");
+      return itemRepresentation.getString("dcbMaterialType");
     }
     return materialType.getName();
   }

@@ -293,6 +293,8 @@ public class ItemRepository {
       jsonObject.put("permanentLoanTypeId", UUID.randomUUID().toString());
       jsonObject.put("effectiveLocationId", UUID.randomUUID().toString());
       jsonObject.put("isDcbItem", true);
+      jsonObject.put("dcbInstanceTitle", "DCB Item");
+      jsonObject.put("dcbMaterialType", "DCB Material Type");
       JsonObject status = new JsonObject();
       status.put("name", "Available");
       jsonObject.put("status", status);
