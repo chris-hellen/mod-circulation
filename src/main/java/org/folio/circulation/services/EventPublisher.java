@@ -379,7 +379,7 @@ public class EventPublisher {
     JsonObject eventJson = new JsonObject();
     write(eventJson, LOG_EVENT_TYPE.value(), payloadType.value());
     write(eventJson, PAYLOAD.value(), context);
-
+    log.info("payloadType: {}, context: {}", payloadType.value(), context.encodePrettily());
     return pubSubPublishingService.publishEvent(LOG_RECORD.name(), eventJson.encode())
       .handle((result, error) -> handlePublishEventError(error, null));
   }
