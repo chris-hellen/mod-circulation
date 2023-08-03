@@ -137,6 +137,7 @@ public class PatronActionSessionService {
       if (loan == null) {
         errorMessage = "referenced loan was not found";
       } else {
+        //When we are using virtual item, we are getting error here. Need to check.
         if (loan.getItem() == null || loan.getItem().isNotFound()) {
           errorMessage = "referenced item was not found";
         }

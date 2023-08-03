@@ -276,13 +276,7 @@ public class ItemRepository {
         .thenApply(mapResult(identityMap::add))
         .thenApply(mapResult(mapper::toDomain));
     }
-    try {
-      log.info(finder.findByQuery(exactMatch("barcode", barcode), one()).get().value().getRecords());
-    } catch (InterruptedException e) {
-      throw new RuntimeException(e);
-    } catch (ExecutionException e) {
-      throw new RuntimeException(e);
-    }
+
     return finder.findByQuery(exactMatch("barcode", barcode), one())
       .thenApply(records -> records.map(MultipleRecords::firstOrNull))
       .thenApply(mapResult(identityMap::add))
@@ -377,10 +371,12 @@ public class ItemRepository {
   public CompletableFuture<Result<Item>> fetchItemRelatedRecords(Result<Item> itemResult) {
     if(itemResult.value().isDcbItem()) {
       log.info("Item related records will not be fetched for item barcode {} ", itemResult.value().getBarcode());
-      return itemResult.combineAfter(this::getHoldings, Item::withHoldings)
-        .thenComposeAsync(combineAfter(this::getInstance, Item::withInstance))
-        .thenComposeAsync(combineAfter(this::getMaterialType, Item::withMaterialType))
-        .thenComposeAsync(combineAfter(this::getLocation, Item::withLocation));
+      // changes are made in Item domain class so that instance name and material type name will be fetched from jsonObject.
+      return completedFuture(itemResult);
+//      return itemResult.combineAfter(this::getHoldings, Item::withHoldings)
+//        .thenComposeAsync(combineAfter(this::getInstance, Item::withInstance))
+//        .thenComposeAsync(combineAfter(this::getMaterialType, Item::withMaterialType))
+//        .thenComposeAsync(combineAfter(this::getLocation, Item::withLocation));
     }
 
     return itemResult.combineAfter(this::fetchHoldingsRecord, Item::withHoldings)
