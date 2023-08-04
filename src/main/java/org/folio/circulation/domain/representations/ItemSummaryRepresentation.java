@@ -74,11 +74,6 @@ public class ItemSummaryRepresentation {
         destinationServicePointSummary);
     }
 
-    if(item.isDcbItem()){
-      itemSummary.put("location", new JsonObject()
-        .put("name", item.getLocationName()));
-    }
-
     final Location location = item.getLocation();
 
     if (location != null) {
@@ -88,6 +83,11 @@ public class ItemSummaryRepresentation {
     }
 
     writeByPath(itemSummary, item.getMaterialTypeName(), "materialType", "name");
+
+    if(item.isDcbItem()){
+      itemSummary.put("location", new JsonObject()
+        .put("name", item.getLocationName()));
+    }
 
     log.info("createItemSummary:: result {}", itemSummary);
     return itemSummary;

@@ -246,7 +246,7 @@ public class ItemRepository {
   private CompletableFuture<Result<MultipleRecords<Item>>> fetchItems(Collection<String> itemIds) {
     final var finder = new CqlIndexValuesFinder<>(createItemFinder());
     final var mapper = new ItemMapper();
-
+    log.info("fetchItems:: itemIds {} ", itemIds);
     return finder.findByIds(itemIds)
       .thenApply(mapResult(identityMap::add))
       .thenApply(mapResult(records -> records.mapRecords(mapper::toDomain)));
@@ -377,7 +377,7 @@ public class ItemRepository {
 
   private CompletableFuture<Result<MultipleRecords<Item>>> fetchFor(
     Collection<String> itemIds) {
-
+    log.info("fetchFor itemIds {} ", itemIds);
     return fetchItems(itemIds)
       .thenComposeAsync(this::fetchItemsRelatedRecords);
   }
