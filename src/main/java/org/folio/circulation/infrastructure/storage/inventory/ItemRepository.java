@@ -83,7 +83,7 @@ public class ItemRepository {
   }
 
   public CompletableFuture<Result<Item>> fetchFor(ItemRelatedRecord itemRelatedRecord) {
-    log.debug("fetchFor:: itemRelatedRecord: {}", itemRelatedRecord);
+    log.info("fetchFor:: itemRelatedRecord: {}", itemRelatedRecord);
     if (itemRelatedRecord.getItemId() == null) {
       log.info("fetchFor:: item id is null");
       return completedFuture(succeeded(Item.from(null)));
@@ -260,9 +260,20 @@ public class ItemRepository {
   }
 
   public CompletableFuture<Result<JsonObject>> fetchItemAsJson(String itemId) {
+    log.info("fetchItemAsJson:: itemId {} ", itemId);
     return SingleRecordFetcher.jsonOrNull(itemsClient, "item")
       .fetch(itemId)
+      .thenApply(res -> fetchDcbItemById(res, itemId))
       .thenApply(mapResult(identityMap::add));
+  }
+
+  public Result<JsonObject> fetchDcbItemById(Result<JsonObject> itemResult, String itemId) {
+    if(itemResult != null) {
+      return itemResult;
+    } else {
+      return succeeded(itemMap.values().stream().filter(obj -> obj.getString("id").equals(itemId))
+          .findFirst().orElse(null));
+    }
   }
 
   private CompletableFuture<Result<Item>> fetchItemByBarcode(String barcode) {
@@ -295,6 +306,7 @@ public class ItemRepository {
       jsonObject.put("isDcbItem", true);
       jsonObject.put("dcbInstanceTitle", "DCB Item");
       jsonObject.put("dcbMaterialType", "DCB Material Type");
+      jsonObject.put("dcbLocationName", "DCB Location");
       JsonObject status = new JsonObject();
       status.put("name", "Available");
       jsonObject.put("status", status);

@@ -208,6 +208,13 @@ public class Item {
     return materialType.getName();
   }
 
+  public String getLocationName() {
+    if(isDcbItem()) {
+      return itemRepresentation.getString("dcbLocationName");
+    }
+    return null;
+  }
+
   public String getCopyNumber() {
     return firstNonBlank(description.getCopyNumber(), holdings.getCopyNumber());
   }

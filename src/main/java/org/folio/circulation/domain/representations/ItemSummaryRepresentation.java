@@ -74,6 +74,11 @@ public class ItemSummaryRepresentation {
         destinationServicePointSummary);
     }
 
+    if(item.isDcbItem()){
+      itemSummary.put("location", new JsonObject()
+        .put("name", item.getLocationName()));
+    }
+
     final Location location = item.getLocation();
 
     if (location != null) {
