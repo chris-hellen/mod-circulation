@@ -84,11 +84,6 @@ public class ItemSummaryRepresentation {
 
     writeByPath(itemSummary, item.getMaterialTypeName(), "materialType", "name");
 
-    if(item.isDcbItem()){
-      itemSummary.put("location", new JsonObject()
-        .put("name", item.getLocationName()));
-    }
-
     log.info("createItemSummary:: result {}", itemSummary);
     return itemSummary;
   }

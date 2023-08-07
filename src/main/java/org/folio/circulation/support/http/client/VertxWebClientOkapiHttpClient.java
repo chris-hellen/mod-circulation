@@ -15,6 +15,7 @@ import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
+import lombok.extern.log4j.Log4j2;
 import org.folio.circulation.support.results.Result;
 import org.folio.circulation.support.ServerErrorFailure;
 
@@ -28,6 +29,7 @@ import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.core.http.HttpMethod;
 
+@Log4j2
 public class VertxWebClientOkapiHttpClient implements OkapiHttpClient {
   private static final Duration DEFAULT_TIMEOUT = Duration.of(20, SECONDS);
   private static final String ACCEPT = HttpHeaderNames.ACCEPT.toString();
@@ -109,7 +111,8 @@ public class VertxWebClientOkapiHttpClient implements OkapiHttpClient {
   @Override
   public CompletableFuture<Result<Response>> get(URL url,
     QueryParameter... queryParameters) {
-
+    log.info("url {}", url);
+    log.info("queryParameters {} ", queryParameters);
     return get(url.toString(), queryParameters);
   }
 

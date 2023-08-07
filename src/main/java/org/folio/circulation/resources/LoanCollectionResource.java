@@ -207,6 +207,7 @@ public class LoanCollectionResource extends CollectionResource {
 
   @Override
   void get(RoutingContext routingContext) {
+    log.info("Inside get");
     final WebContext context = new WebContext(routingContext);
     final Clients clients = Clients.create(context, client);
 
@@ -250,6 +251,7 @@ public class LoanCollectionResource extends CollectionResource {
 
   @Override
   void getMany(RoutingContext routingContext) {
+    log.info("Inside getMany");
     WebContext context = new WebContext(routingContext);
     Clients clients = Clients.create(context, client);
 

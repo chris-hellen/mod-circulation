@@ -123,9 +123,6 @@ public class Item {
   }
 
   public String getTitle() {
-    if(isDcbItem()) {
-      return itemRepresentation.getString("dcbInstanceTitle");
-    }
     return instance.getTitle();
   }
 
@@ -202,18 +199,9 @@ public class Item {
   }
 
   public String getMaterialTypeName() {
-    if(isDcbItem()) {
-      return itemRepresentation.getString("dcbMaterialType");
-    }
     return materialType.getName();
   }
 
-  public String getLocationName() {
-    if(isDcbItem()) {
-      return itemRepresentation.getString("dcbLocationName");
-    }
-    return null;
-  }
 
   public String getCopyNumber() {
     return firstNonBlank(description.getCopyNumber(), holdings.getCopyNumber());

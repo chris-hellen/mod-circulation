@@ -304,9 +304,9 @@ public class ItemRepository {
       jsonObject.put("permanentLoanTypeId", UUID.randomUUID().toString());
       jsonObject.put("effectiveLocationId", UUID.randomUUID().toString());
       jsonObject.put("isDcbItem", true);
-      jsonObject.put("dcbInstanceTitle", "DCB Item");
-      jsonObject.put("dcbMaterialType", "DCB Material Type");
-      jsonObject.put("dcbLocationName", "DCB Location");
+//      jsonObject.put("dcbInstanceTitle", "DCB Item");
+//      jsonObject.put("dcbMaterialType", "DCB Material Type");
+//      jsonObject.put("dcbLocationName", "DCB Location");
       JsonObject status = new JsonObject();
       status.put("name", "Available");
       jsonObject.put("status", status);
@@ -384,13 +384,14 @@ public class ItemRepository {
 
   public CompletableFuture<Result<Item>> fetchItemRelatedRecords(Result<Item> itemResult) {
     if(itemResult.value().isDcbItem()) {
-      log.info("Item related records will not be fetched for item barcode {} ", itemResult.value().getBarcode());
+      log.info("Item related records will not be fetched for item barcode {} with status",
+        itemResult.value().getBarcode(), itemResult.value().getStatus().getValue());
       // changes are made in Item domain class so that instance name and material type name will be fetched from jsonObject.
-      return completedFuture(itemResult);
-//      return itemResult.combineAfter(this::getHoldings, Item::withHoldings)
-//        .thenComposeAsync(combineAfter(this::getInstance, Item::withInstance))
-//        .thenComposeAsync(combineAfter(this::getMaterialType, Item::withMaterialType))
-//        .thenComposeAsync(combineAfter(this::getLocation, Item::withLocation));
+//      return completedFuture(itemResult);
+      return itemResult.combineAfter(this::getHoldings, Item::withHoldings)
+        .thenComposeAsync(combineAfter(this::getInstance, Item::withInstance))
+        .thenComposeAsync(combineAfter(this::getMaterialType, Item::withMaterialType))
+        .thenComposeAsync(combineAfter(this::getLocation, Item::withLocation));
     }
 
     return itemResult.combineAfter(this::fetchHoldingsRecord, Item::withHoldings)
@@ -414,7 +415,7 @@ public class ItemRepository {
     final var mapper = new InstanceMapper();
     JsonObject jsonObject = new JsonObject();
     jsonObject.put("id", item.getInstanceId());
-    jsonObject.put("title", "DCB Item");
+    jsonObject.put("title", "DCB Instance Item");
     return completedFuture(succeeded(mapper.toDomain(jsonObject)));
   }
 
@@ -422,7 +423,7 @@ public class ItemRepository {
     final var mapper = new MaterialTypeMapper();
     JsonObject jsonObject = new JsonObject();
     jsonObject.put("id", item.getMaterialTypeId());
-    jsonObject.put("name", "DCB Material type");
+    jsonObject.put("name", "DCB Material type - Book");
     return completedFuture(succeeded(mapper.toDomain(jsonObject)));
   }
 
@@ -430,7 +431,7 @@ public class ItemRepository {
     final var mapper = new LocationMapper();
     JsonObject jsonObject = new JsonObject();
     jsonObject.put("id", item.getMaterialTypeId());
-    jsonObject.put("name", "Dcb Main Library");
+    jsonObject.put("name", "Dcb - Main Library");
     return completedFuture(succeeded(mapper.toDomain(jsonObject)));
   }
 
