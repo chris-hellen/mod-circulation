@@ -268,15 +268,17 @@ public class ItemRepository {
     } catch (ExecutionException e) {
       throw new RuntimeException(e);
     }
-    return CompletableFuture.completedFuture(succeeded(createJsonObject("test")))
+
+    SingleRecordFetcher.jsonOrNull(itemsClient, "item")
+      .fetch(itemId)
+      .thenApply(res -> fetchDcbItemById(res, itemId))
       .thenApply(mapResult(identityMap::add));
-//    return SingleRecordFetcher.jsonOrNull(itemsClient, "item")
-//      .fetch(itemId)
-//      .thenApply(res -> fetchDcbItemById(res, itemId))
-//      .thenApply(mapResult(identityMap::add));
+    return CompletableFuture.completedFuture(succeeded(createJsonObjectWithId(itemId)))
+      .thenApply(mapResult(identityMap::add));
   }
 
   public Result<JsonObject> fetchDcbItemById(Result<JsonObject> itemResult, String itemId) {
+    log.info("fetchDcbItemById {} ", itemResult.value());
     if(itemResult != null) {
       return itemResult;
     } else {
@@ -328,6 +330,24 @@ public class ItemRepository {
     return itemMap.get(barcode);
   }
 
+  private JsonObject createJsonObjectWithId(String itemId) {
+    JsonObject jsonObject = new JsonObject();
+      jsonObject.put("id", itemId);
+      jsonObject.put("barcode", "test");
+      jsonObject.put("holdingsRecordId", UUID.randomUUID().toString());
+      jsonObject.put("materialTypeId", UUID.randomUUID().toString());
+      jsonObject.put("permanentLoanTypeId", UUID.randomUUID().toString());
+      jsonObject.put("effectiveLocationId", UUID.randomUUID().toString());
+      jsonObject.put("isDcbItem", true);
+//      jsonObject.put("dcbInstanceTitle", "DCB Item");
+//      jsonObject.put("dcbMaterialType", "DCB Material Type");
+//      jsonObject.put("dcbLocationName", "DCB Location");
+      JsonObject status = new JsonObject();
+      status.put("name", "Available");
+      jsonObject.put("status", status);
+
+    return jsonObject;
+  }
   public <T extends ItemRelatedRecord> CompletableFuture<Result<MultipleRecords<T>>>
   fetchItemsFor(Result<MultipleRecords<T>> result, BiFunction<T, Item, T> includeItemMap) {
 
