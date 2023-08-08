@@ -271,8 +271,12 @@ public class ItemRepository {
     if(itemResult != null) {
       return itemResult;
     } else {
-      return succeeded(itemMap.values().stream().filter(obj -> obj.getString("id").equals(itemId))
-          .findFirst().orElse(null));
+      log.info("Inside else for fetching DCB item by id {} ", itemMap.values());
+      return succeeded(itemMap.values()
+        .stream()
+        .filter(obj -> obj.getString("id").equals(itemId))
+        .findFirst()
+        .orElse(createJsonObject("test")));
     }
   }
 
