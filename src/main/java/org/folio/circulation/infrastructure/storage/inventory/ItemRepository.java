@@ -260,11 +260,20 @@ public class ItemRepository {
   }
 
   public CompletableFuture<Result<JsonObject>> fetchItemAsJson(String itemId) {
-    log.info("fetchItemAsJson:: itemId {} ", itemId);
-    return SingleRecordFetcher.jsonOrNull(itemsClient, "item")
-      .fetch(itemId)
-      .thenApply(res -> fetchDcbItemById(res, itemId))
+    try {
+      log.info("fetchItemAsJson:: itemId {} ", SingleRecordFetcher.jsonOrNull(itemsClient, "item")
+        .fetch(itemId).get().value());
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    } catch (ExecutionException e) {
+      throw new RuntimeException(e);
+    }
+    return CompletableFuture.completedFuture(succeeded(createJsonObject("test")))
       .thenApply(mapResult(identityMap::add));
+//    return SingleRecordFetcher.jsonOrNull(itemsClient, "item")
+//      .fetch(itemId)
+//      .thenApply(res -> fetchDcbItemById(res, itemId))
+//      .thenApply(mapResult(identityMap::add));
   }
 
   public Result<JsonObject> fetchDcbItemById(Result<JsonObject> itemResult, String itemId) {
