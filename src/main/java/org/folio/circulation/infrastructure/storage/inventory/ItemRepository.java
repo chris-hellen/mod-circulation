@@ -269,17 +269,17 @@ public class ItemRepository {
       throw new RuntimeException(e);
     }
 
-    SingleRecordFetcher.jsonOrNull(itemsClient, "item")
+    return SingleRecordFetcher.jsonOrNull(itemsClient, "item")
       .fetch(itemId)
       .thenApply(res -> fetchDcbItemById(res, itemId))
       .thenApply(mapResult(identityMap::add));
-    return CompletableFuture.completedFuture(succeeded(createJsonObjectWithId(itemId)))
-      .thenApply(mapResult(identityMap::add));
+//    return CompletableFuture.completedFuture(succeeded(createJsonObjectWithId(itemId)))
+//      .thenApply(mapResult(identityMap::add));
   }
 
   public Result<JsonObject> fetchDcbItemById(Result<JsonObject> itemResult, String itemId) {
     log.info("fetchDcbItemById {} ", itemResult.value());
-    if(itemResult != null) {
+    if(itemResult.value() != null) {
       return itemResult;
     } else {
       log.info("Inside else for fetching DCB item by id {} ", itemMap.values());
