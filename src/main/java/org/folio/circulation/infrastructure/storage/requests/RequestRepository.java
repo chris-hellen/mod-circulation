@@ -236,7 +236,7 @@ public class RequestRepository {
   public CompletableFuture<Result<RequestAndRelatedRecords>> create(
     RequestAndRelatedRecords requestAndRelatedRecords) {
 
-    log.debug("create:: parameters requestAndRelatedRecords: {}", requestAndRelatedRecords);
+    log.info("create:: parameters requestAndRelatedRecords: {}", requestAndRelatedRecords);
 
     final Request request = requestAndRelatedRecords.getRequest();
 

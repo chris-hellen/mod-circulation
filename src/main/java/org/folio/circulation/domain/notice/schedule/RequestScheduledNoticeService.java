@@ -49,6 +49,7 @@ public class RequestScheduledNoticeService {
 
 
   public Result<RequestAndRelatedRecords> scheduleRequestNotices(RequestAndRelatedRecords relatedRecords) {
+    log.info("Inside scheduleRequestNotices");
     Request request = relatedRecords.getRequest();
     if (request.isClosed()) {
       return succeeded(relatedRecords);

@@ -4,8 +4,11 @@ import static java.util.concurrent.CompletableFuture.completedFuture;
 import static org.folio.circulation.support.results.Result.of;
 import static org.folio.circulation.support.results.Result.succeeded;
 
+import java.lang.invoke.MethodHandles;
 import java.util.concurrent.CompletableFuture;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.circulation.domain.notice.schedule.LoanScheduledNoticeService;
 import org.folio.circulation.domain.policy.LoanPolicy;
 import org.folio.circulation.domain.policy.library.ClosedLibraryStrategyService;
@@ -16,6 +19,7 @@ import org.folio.circulation.support.results.Result;
 import org.folio.circulation.support.utils.ClockUtil;
 
 public class UpdateLoan {
+  private static final Logger log = LogManager.getLogger(MethodHandles.lookup().lookupClass());
   private final ClosedLibraryStrategyService closedLibraryStrategyService;
   private final LoanRepository loanRepository;
   private final LoanPolicyRepository loanPolicyRepository;
@@ -41,7 +45,7 @@ public class UpdateLoan {
    */
   CompletableFuture<Result<RequestAndRelatedRecords>> onRequestCreateOrUpdate(
       RequestAndRelatedRecords requestAndRelatedRecords) {
-
+    log.info("onRequestCreateOrUpdate:: {} ", requestAndRelatedRecords);
     Request request = requestAndRelatedRecords.getRequest();
     Loan loan = request.getLoan();
 

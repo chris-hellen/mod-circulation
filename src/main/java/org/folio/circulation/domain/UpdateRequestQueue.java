@@ -265,6 +265,7 @@ public class UpdateRequestQueue {
 
   CompletableFuture<Result<RequestAndRelatedRecords>> onCreate(
     RequestAndRelatedRecords requestAndRelatedRecords) {
+    log.info("update request queue on create {} ", requestAndRelatedRecords);
     final Request request = requestAndRelatedRecords.getRequest();
     final RequestQueue requestQueue = requestAndRelatedRecords.getRequestQueue();
     requestQueue.add(request);
