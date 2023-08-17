@@ -328,7 +328,7 @@ public class ItemRepository {
       itemMap.put(barcode, jsonObject);
     }
     log.info("item barcode {} , status {}",
-      itemMap.get(barcode).getJsonObject("barcode"), itemMap.get(barcode).getJsonObject("status"));
+      itemMap.get(barcode).getString("barcode"), itemMap.get(barcode).getString("status"));
     return itemMap.get(barcode);
   }
 
