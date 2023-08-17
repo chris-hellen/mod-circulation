@@ -314,7 +314,7 @@ public class ItemRepository {
     if(itemMap.get(barcode) == null) {
       jsonObject.put("id", UUID.randomUUID().toString());
       jsonObject.put("barcode", barcode);
-      jsonObject.put("holdingsRecordId", UUID.randomUUID().toString());
+      jsonObject.put("holdingsRecordId", "e2753739-a06d-4703-ae83-0cc2c4a27b06");
       jsonObject.put("materialTypeId", UUID.randomUUID().toString());
       jsonObject.put("permanentLoanTypeId", UUID.randomUUID().toString());
       jsonObject.put("effectiveLocationId", UUID.randomUUID().toString());
@@ -327,6 +327,8 @@ public class ItemRepository {
       jsonObject.put("status", status);
       itemMap.put(barcode, jsonObject);
     }
+    log.info("item barcode {} , status {}",
+      itemMap.get(barcode).getJsonObject("barcode"), itemMap.get(barcode).getJsonObject("status"));
     return itemMap.get(barcode);
   }
 
@@ -439,7 +441,7 @@ public class ItemRepository {
     final var mapper = new HoldingsMapper();
     JsonObject jsonObject = new JsonObject();
     jsonObject.put("id", item.getHoldingsRecordId());
-    jsonObject.put("instanceId", UUID.randomUUID().toString());
+    jsonObject.put("instanceId", "efcbd813-d93e-448c-87d8-d588cc609454");
     return completedFuture(succeeded(mapper.toDomain(jsonObject)));
   }
 
