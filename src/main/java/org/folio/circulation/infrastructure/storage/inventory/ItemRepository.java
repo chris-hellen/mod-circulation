@@ -319,11 +319,8 @@ public class ItemRepository {
       jsonObject.put("permanentLoanTypeId", UUID.randomUUID().toString());
       jsonObject.put("effectiveLocationId", UUID.randomUUID().toString());
       jsonObject.put("isDcbItem", true);
-//      jsonObject.put("dcbInstanceTitle", "DCB Item");
-//      jsonObject.put("dcbMaterialType", "DCB Material Type");
-//      jsonObject.put("dcbLocationName", "DCB Location");
       JsonObject status = new JsonObject();
-      status.put("name", "Available");
+      status.put("name", "Paged");
       jsonObject.put("status", status);
       itemMap.put(barcode, jsonObject);
     }
