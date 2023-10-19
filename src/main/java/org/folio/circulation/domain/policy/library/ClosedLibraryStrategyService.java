@@ -59,7 +59,7 @@ public class ClosedLibraryStrategyService {
   public CompletableFuture<Result<LoanAndRelatedRecords>> applyClosedLibraryDueDateManagement(
     LoanAndRelatedRecords relatedRecords, boolean isRecall) {
 
-    log.debug("applyClosedLibraryDueDateManagement:: parameters relatedRecords: {}, isRecall: {}",
+    log.info("applyClosedLibraryDueDateManagement:: parameters relatedRecords: {}, isRecall: {}",
       relatedRecords.getLoan(), isRecall);
     final Loan loan = relatedRecords.getLoan();
 

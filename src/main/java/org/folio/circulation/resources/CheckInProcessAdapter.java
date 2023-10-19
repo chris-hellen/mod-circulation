@@ -188,7 +188,7 @@ class CheckInProcessAdapter {
   CompletableFuture<Result<RequestQueue>> updateRequestQueue(
     CheckInContext context) {
 
-    log.debug("updateRequestQueue:: parameters context: {}", () -> context);
+    log.info("updateRequestQueue:: parameters context: {}", () -> context);
     final RequestQueue requestQueue = context.getRequestQueue();
     final Item item = context.getItem();
     final String checkInServicePointId = context.getCheckInServicePointId().toString();

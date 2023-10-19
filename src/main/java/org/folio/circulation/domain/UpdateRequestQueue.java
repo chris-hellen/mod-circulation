@@ -66,7 +66,7 @@ public class UpdateRequestQueue {
 
   public CompletableFuture<Result<LoanAndRelatedRecords>> onCheckIn(
     LoanAndRelatedRecords relatedRecords) {
-
+    log.info("onCheckIn:: onCheckIn relatedRecords: {}", relatedRecords);
     //Do not attempt check in for open loan
     if(relatedRecords.getLoan().isOpen()) {
       return ofAsync(() -> relatedRecords);
@@ -82,6 +82,7 @@ public class UpdateRequestQueue {
 
   public CompletableFuture<Result<RequestQueue>> onCheckIn(
     RequestQueue requestQueue, Item item, String checkInServicePointId) {
+    log.info("onCheckIn:: requestQueue: {}, item: {}, checkInServicePointId : {}", requestQueue, item, checkInServicePointId);
 
     return requestQueueService.findRequestFulfillableByItem(item, requestQueue)
       .thenCompose(r -> r.after(request -> updateOutstandingRequestOnCheckIn(
@@ -145,17 +146,18 @@ public class UpdateRequestQueue {
   private CompletableFuture<Result<RequestQueue>> awaitPickup(Request request, RequestQueue requestQueue) {
     Request originalRequest = Request.from(request.asJson());
     request.changeStatus(RequestStatus.OPEN_AWAITING_PICKUP);
-
+    log.info("awaitPickup:: request: {}, requestQueue: {}", request, requestQueue);
     if (request.getHoldShelfExpirationDate() == null) {
       String pickupServicePointId = request.getPickupServicePointId();
-
+      log.info("awaitPickup:: getHoldShelfExpirationDate is null");
       return servicePointRepository.getServicePointById(pickupServicePointId)
         .thenCombineAsync(configurationRepository.findTimeZoneConfiguration(),
           Result.combined((servicePoint, tenantTimeZone) ->
             populateHoldShelfExpirationDate(
               request.withPickupServicePoint(servicePoint),
               tenantTimeZone
-            ).map(calculatedRequest-> setHoldShelfExpirationDateWithExpirationDateManagement(tenantTimeZone, calculatedRequest,
+            ).map(calculatedRequest->
+              setHoldShelfExpirationDateWithExpirationDateManagement(tenantTimeZone, calculatedRequest,
               requestQueue, originalRequest)))
         );
     } else {
@@ -175,6 +177,7 @@ public class UpdateRequestQueue {
     log.info("setHoldShelfExpirationDateWithExpirationDateManagement expDate before:{}",calculatedRequest.getHoldShelfExpirationDate());
     // Old data where strategy is not set so default value but TimePeriod has MINUTES / HOURS
     if (ExpirationDateManagement.KEEP_THE_CURRENT_DUE_DATE == expirationDateManagement && isShortTerm(intervalId)) {
+      log.info("setHoldShelfExpirationDateWithExpirationDateManagement:: isShortTerm()");
       expirationDateManagement = ExpirationDateManagement.KEEP_THE_CURRENT_DUE_DATE_TIME;
     }
 
@@ -186,6 +189,7 @@ public class UpdateRequestQueue {
     calendarRepository.lookupOpeningDays(calculatedRequest.getHoldShelfExpirationDate().toLocalDate(), calculatedRequest.getPickupServicePoint().getId())
       .thenApply(adjacentOpeningDaysResult -> closedLibraryStrategy.calculateDueDate(calculatedRequest.getHoldShelfExpirationDate(), adjacentOpeningDaysResult.value()))
       .thenApply(calculatedDate -> {
+
         log.info("calculatedDate after :{}",calculatedDate.value());
         calculatedRequest.changeHoldShelfExpirationDate(calculatedDate.value());
         requestQueue.update(originalRequest,calculatedRequest);
@@ -218,13 +222,14 @@ public class UpdateRequestQueue {
     ServicePoint pickupServicePoint = request.getPickupServicePoint();
     TimePeriod holdShelfExpiryPeriod = pickupServicePoint.getHoldShelfExpiryPeriod();
 
-    log.debug("Using time zone {} and period {}",
+    log.info("Using time zone {} and period {}",
       tenantTimeZone,
       holdShelfExpiryPeriod.getInterval()
     );
 
     ZonedDateTime holdShelfExpirationDate =
       calculateHoldShelfExpirationDate(holdShelfExpiryPeriod, tenantTimeZone);
+
 
     request.changeHoldShelfExpirationDate(holdShelfExpirationDate);
 

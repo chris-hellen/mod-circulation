@@ -57,7 +57,7 @@ public final class ClosedLibraryStrategyUtils {
     ExpirationDateManagement expirationDateManagement, ZonedDateTime requestedDate, ZoneId zone,
     TimePeriod intervalPeriod) {
 
-    log.debug("determineClosedLibraryStrategyForHoldShelfExpirationDate:: parameters " +
+    log.info("determineClosedLibraryStrategyForHoldShelfExpirationDate:: parameters " +
       "expirationDateManagement: {}, requestedDate: {}, zone: {}, intervalPeriod: {}",
       expirationDateManagement, requestedDate, zone, intervalPeriod);
 
