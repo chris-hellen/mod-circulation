@@ -230,7 +230,7 @@ public class UpdateRequestQueue {
     ZonedDateTime holdShelfExpirationDate =
       calculateHoldShelfExpirationDate(holdShelfExpiryPeriod, tenantTimeZone);
 
-
+    log.info("populateHoldShelfExpirationDate:: holdShelfExpirationDate: {}", holdShelfExpirationDate);
     request.changeHoldShelfExpirationDate(holdShelfExpirationDate);
 
     return succeeded(request);
@@ -367,12 +367,15 @@ public class UpdateRequestQueue {
     TimePeriod holdShelfExpiryPeriod, ZoneId tenantTimeZone) {
 
     ZonedDateTime now = getZonedDateTime().withZoneSameInstant(tenantTimeZone);
-
+    log.info("calculateHoldShelfExpirationDate:: now : {}", now);
     ZonedDateTime holdShelfExpirationDate = holdShelfExpiryPeriod.getInterval()
       .addTo(now, holdShelfExpiryPeriod.getDuration());
+    log.info("calculateHoldShelfExpirationDate:: now : {}, holdShelfExpirationDate: {} ", now, holdShelfExpirationDate);
 
     if (holdShelfExpiryPeriod.isLongTermPeriod()) {
+      log.info("calculateHoldShelfExpirationDate:: is Long term Period");
       holdShelfExpirationDate = atEndOfDay(holdShelfExpirationDate);
+      log.info("calculateHoldShelfExpirationDate:: is Long term Period, holdShelfExpirationDate: {}", holdShelfExpirationDate);
     }
 
     return holdShelfExpirationDate;
