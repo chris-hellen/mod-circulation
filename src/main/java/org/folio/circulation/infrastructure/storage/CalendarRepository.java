@@ -2,6 +2,7 @@ package org.folio.circulation.infrastructure.storage;
 
 import static org.folio.circulation.support.ValidationErrorFailure.failedValidation;
 
+import java.lang.invoke.MethodHandles;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -10,6 +11,8 @@ import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.UnaryOperator;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.circulation.AdjacentOpeningDays;
 import org.folio.circulation.domain.MultipleRecords;
 import org.folio.circulation.domain.OpeningDay;
@@ -24,6 +27,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 public class CalendarRepository {
+  private static final Logger log = LogManager.getLogger(MethodHandles.lookup().lookupClass());
 
   private static final int PREV_OPENING_INDEX = 0;
   private static final int CURR_OPENING_INDEX = 1;
@@ -96,11 +100,11 @@ public class CalendarRepository {
     }
 
     JsonArray openingDaysJson = jsonObject.getJsonArray(SURROUNDING_DATES_KEY);
-
+    log.info("convertToOpeningDays:: openingDays : {}",openingDaysJson);
     OpeningDay previousDate = new OpeningDay(openingDaysJson.getJsonObject(PREV_OPENING_INDEX));
     OpeningDay requestedDate = new OpeningDay(openingDaysJson.getJsonObject(CURR_OPENING_INDEX));
     OpeningDay nextDate = new OpeningDay(openingDaysJson.getJsonObject(NEXT_OPENING_INDEX));
-
+    log.info("convertToOpeningDays:: previousDate : {}, requestedDate : {}, nextDate: {}",previousDate, requestedDate, nextDate);
     return new AdjacentOpeningDays(previousDate, requestedDate, nextDate);
   }
 }
