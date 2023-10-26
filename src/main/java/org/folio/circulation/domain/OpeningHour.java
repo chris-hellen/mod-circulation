@@ -7,9 +7,11 @@ import java.time.LocalTime;
 import io.vertx.core.json.JsonObject;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.ToString;
 
 @Getter
 @AllArgsConstructor
+@ToString
 public class OpeningHour {
 
   private static final String START_TIME_KEY = "startTime";
