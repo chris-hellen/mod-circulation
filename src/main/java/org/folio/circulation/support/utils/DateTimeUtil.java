@@ -372,8 +372,9 @@ public class DateTimeUtil {
    */
   public static ZonedDateTime atStartOfDay(ZonedDateTime dateTime, ZoneId zone) {
     log.info("atStartOfDay:: dateTime: {}, zoneId : {}", dateTime, zone);
-    return dateTime
-      .withZoneSameInstant(zone)
+    var zoneSameInstant = dateTime.withZoneSameInstant(zone);
+    log.info("atStartOfDay:: zoneSameInstant: {}", zoneSameInstant);
+    return zoneSameInstant
       .truncatedTo(ChronoUnit.DAYS);
   }
 
@@ -402,7 +403,9 @@ public class DateTimeUtil {
    */
   public static ZonedDateTime atEndOfDay(ZonedDateTime dateTime, ZoneId zone) {
     log.info("atEndOfDay:: dateTime: {}, zoneId : {}", dateTime, zone);
-    return atStartOfDay(dateTime, zone)
+    var startOfDay = atStartOfDay(dateTime, zone);
+    log.info("atEndOfDay:: startOfDay: {}", startOfDay);
+    return startOfDay
       .plusDays(1)
       .minusSeconds(1)
       .truncatedTo(ChronoUnit.SECONDS);
