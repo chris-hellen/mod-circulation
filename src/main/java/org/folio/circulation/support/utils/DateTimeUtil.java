@@ -403,7 +403,7 @@ public class DateTimeUtil {
    */
   public static ZonedDateTime atEndOfDay(ZonedDateTime dateTime, ZoneId zone) {
     log.info("atEndOfDay:: dateTime: {}, zoneId : {}", dateTime, zone);
-    var startOfDay = atStartOfDay(dateTime, zone);
+    var startOfDay = atStartOfDay(dateTime);
     log.info("atEndOfDay:: startOfDay: {}", startOfDay);
     return startOfDay
       .plusDays(1)
