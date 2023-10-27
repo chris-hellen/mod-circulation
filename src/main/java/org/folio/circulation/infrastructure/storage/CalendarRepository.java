@@ -53,7 +53,7 @@ public class CalendarRepository {
   public CompletableFuture<Result<AdjacentOpeningDays>> lookupOpeningDays(
     LocalDate requestedDate, String servicePointId) {
     String path = String.format(SURROUNDING_DATES_PATH, servicePointId, requestedDate);
-
+    log.info("lookupOpeningDays:: requestedDate: {}, servicePointId: {}", requestedDate, servicePointId);
     // TODO: Validation error should have parameters
     return FetchSingleRecord
       .<AdjacentOpeningDays>forRecord(OPENING_INFO_RECORD_TYPE)
