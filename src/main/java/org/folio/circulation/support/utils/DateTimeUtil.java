@@ -1,8 +1,12 @@
 package org.folio.circulation.support.utils;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import static java.time.ZoneOffset.UTC;
 import static java.time.temporal.ChronoUnit.MILLIS;
 
+import java.lang.invoke.MethodHandles;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -38,6 +42,8 @@ import java.util.stream.Stream;
  * the time zone without changing any values.
  */
 public class DateTimeUtil {
+  private static final Logger log = LogManager.getLogger(MethodHandles.lookup().lookupClass());
+
   private DateTimeUtil() {
     throw new UnsupportedOperationException("Do not instantiate");
   }
@@ -365,6 +371,7 @@ public class DateTimeUtil {
    * @return The converted dateTime.
    */
   public static ZonedDateTime atStartOfDay(ZonedDateTime dateTime, ZoneId zone) {
+    log.info("atStartOfDay:: dateTime: {}, zoneId : {}", dateTime, zone);
     return dateTime
       .withZoneSameInstant(zone)
       .truncatedTo(ChronoUnit.DAYS);
@@ -394,6 +401,7 @@ public class DateTimeUtil {
    * @return The converted dateTime.
    */
   public static ZonedDateTime atEndOfDay(ZonedDateTime dateTime, ZoneId zone) {
+    log.info("atEndOfDay:: dateTime: {}, zoneId : {}", dateTime, zone);
     return atStartOfDay(dateTime, zone)
       .plusDays(1)
       .minusSeconds(1)
