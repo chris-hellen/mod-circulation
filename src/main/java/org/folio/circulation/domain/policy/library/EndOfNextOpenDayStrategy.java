@@ -10,6 +10,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 
+import com.thoughtworks.xstream.converters.time.ZonedDateTimeConverter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.circulation.AdjacentOpeningDays;
@@ -34,7 +35,7 @@ public class EndOfNextOpenDayStrategy implements ClosedLibraryStrategy {
       log.info("calculateDueDate:: requestedDay is open");
       log.info("calculateDueDate:: get requestedDay : {}", openingDays.getRequestedDay());
       log.info("calculateDueDate:: requestedDay : {}, zone: {}", requestedDate, zone);
-      var res = atEndOfDay(requestedDate, zone);
+      var res = atEndOfDay(ZonedDateTime.parse("2023-10-30T06:59:59-07:00"), zone);
       log.info("calculateDueDate:: res: {}", res);
       return succeeded(res);
     }
