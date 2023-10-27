@@ -372,11 +372,11 @@ public class UpdateRequestQueue {
       .addTo(now, holdShelfExpiryPeriod.getDuration());
     log.info("calculateHoldShelfExpirationDate:: now : {}, holdShelfExpirationDate: {} ", now, holdShelfExpirationDate);
 
-//    if (holdShelfExpiryPeriod.isLongTermPeriod()) {
-//      log.info("calculateHoldShelfExpirationDate:: is Long term Period");
-//      holdShelfExpirationDate = atEndOfDay(holdShelfExpirationDate);
-//      log.info("calculateHoldShelfExpirationDate:: is Long term Period, holdShelfExpirationDate: {}", holdShelfExpirationDate);
-//    }
+    if (holdShelfExpiryPeriod.isLongTermPeriod()) {
+      log.info("calculateHoldShelfExpirationDate:: is Long term Period");
+      holdShelfExpirationDate = atEndOfDay(holdShelfExpirationDate);
+      log.info("calculateHoldShelfExpirationDate:: is Long term Period, holdShelfExpirationDate: {}", holdShelfExpirationDate);
+    }
 
     return holdShelfExpirationDate;
   }
