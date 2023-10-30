@@ -6,7 +6,9 @@ import static org.folio.circulation.support.results.Result.succeeded;
 import static org.folio.circulation.support.utils.DateTimeUtil.atEndOfDay;
 
 import java.lang.invoke.MethodHandles;
+import java.time.Instant;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 
@@ -35,7 +37,7 @@ public class EndOfNextOpenDayStrategy implements ClosedLibraryStrategy {
       log.info("calculateDueDate:: requestedDay is open");
       log.info("calculateDueDate:: get requestedDay : {}", openingDays.getRequestedDay());
       log.info("calculateDueDate:: requestedDay : {}, zone: {}", requestedDate, zone);
-      var res = atEndOfDay(ZonedDateTime.parse("2023-10-30T06:59:59-07:00"), zone);
+      var res = atEndOfDay(requestedDate.withZoneSameInstant(zone), zone);
       log.info("calculateDueDate:: res: {}", res);
       return succeeded(res);
     }
