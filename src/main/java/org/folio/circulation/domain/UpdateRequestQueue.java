@@ -187,7 +187,7 @@ public class UpdateRequestQueue {
       (finalExpirationDateManagement, calculatedRequest.getHoldShelfExpirationDate(), tenantTimeZone, calculatedRequest.getPickupServicePoint().getHoldShelfExpiryPeriod());
 
     calendarRepository.lookupOpeningDays(calculatedRequest.getHoldShelfExpirationDate().toLocalDate(), calculatedRequest.getPickupServicePoint().getId())
-      .thenApply(adjacentOpeningDaysResult -> closedLibraryStrategy.calculateDueDate(calculatedRequest.getHoldShelfExpirationDate(), adjacentOpeningDaysResult.value()))
+      .thenApply(adjacentOpeningDaysResult -> closedLibraryStrategy.calculateDueDate(calculatedRequest.getHoldShelfExpirationDate().withZoneSameInstant(tenantTimeZone), adjacentOpeningDaysResult.value()))
       .thenApply(calculatedDate -> {
 
         log.info("calculatedDate after :{}",calculatedDate.value());
