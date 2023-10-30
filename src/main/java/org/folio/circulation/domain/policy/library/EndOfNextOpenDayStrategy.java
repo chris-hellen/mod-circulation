@@ -12,7 +12,6 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 
-import com.thoughtworks.xstream.converters.time.ZonedDateTimeConverter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.circulation.AdjacentOpeningDays;
@@ -33,11 +32,13 @@ public class EndOfNextOpenDayStrategy implements ClosedLibraryStrategy {
     Objects.requireNonNull(openingDays);
     log.info("calculateDueDate:: parameters requestedDate: {}, openingDays: {}",
       requestedDate, openingDays);
+    ZonedDateTime.parse("ss");
     if (openingDays.getRequestedDay().isOpen()) {
       log.info("calculateDueDate:: requestedDay is open");
       log.info("calculateDueDate:: get requestedDay : {}", openingDays.getRequestedDay());
       log.info("calculateDueDate:: requestedDay : {}, zone: {}", requestedDate, zone);
-      var res = atEndOfDay(requestedDate.withZoneSameInstant(zone), zone);
+      ZonedDateTime converted = convertToSpecificOffset(requestedDate,zone);
+      var res = atEndOfDay(converted, zone);
       log.info("calculateDueDate:: res: {}", res);
       return succeeded(res);
     }
@@ -52,5 +53,13 @@ public class EndOfNextOpenDayStrategy implements ClosedLibraryStrategy {
         log.info("calculateDueDate:: result: {}", dateTime);
         return succeeded(dateTime);
       });
+  }
+  private ZonedDateTime convertToSpecificOffset(ZonedDateTime requestedDate, ZoneId zone) {
+    String inputTimestamp = requestedDate.toString();
+
+    Instant instant = Instant.parse(inputTimestamp);
+    ZoneOffset zoneOffset = instant.atZone(zone).getOffset();
+    log.info("offset: {}", zoneOffset);
+    return instant.atOffset(zoneOffset).atZoneSameInstant(zone);
   }
 }
