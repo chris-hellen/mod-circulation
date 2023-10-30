@@ -6,9 +6,7 @@ import static org.folio.circulation.support.results.Result.succeeded;
 import static org.folio.circulation.support.utils.DateTimeUtil.atEndOfDay;
 
 import java.lang.invoke.MethodHandles;
-import java.time.Instant;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 
@@ -37,8 +35,7 @@ public class EndOfNextOpenDayStrategy implements ClosedLibraryStrategy {
       log.info("calculateDueDate:: requestedDay is open");
       log.info("calculateDueDate:: get requestedDay : {}", openingDays.getRequestedDay());
       log.info("calculateDueDate:: requestedDay : {}, zone: {}", requestedDate, zone);
-      ZonedDateTime converted = convertToSpecificOffset(requestedDate,zone);
-      var res = atEndOfDay(converted, zone);
+      var res = atEndOfDay(requestedDate.withZoneSameInstant(zone), zone);
       log.info("calculateDueDate:: res: {}", res);
       return succeeded(res);
     }
@@ -53,13 +50,5 @@ public class EndOfNextOpenDayStrategy implements ClosedLibraryStrategy {
         log.info("calculateDueDate:: result: {}", dateTime);
         return succeeded(dateTime);
       });
-  }
-  private ZonedDateTime convertToSpecificOffset(ZonedDateTime requestedDate, ZoneId zone) {
-    String inputTimestamp = requestedDate.toString();
-
-    Instant instant = Instant.parse(inputTimestamp);
-    ZoneOffset zoneOffset = instant.atZone(zone).getOffset();
-    log.info("offset: {}", zoneOffset);
-    return instant.atOffset(zoneOffset).atZoneSameInstant(zone);
   }
 }
