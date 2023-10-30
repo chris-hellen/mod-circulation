@@ -35,7 +35,7 @@ public class EndOfNextOpenDayStrategy implements ClosedLibraryStrategy {
       log.info("calculateDueDate:: requestedDay is open");
       log.info("calculateDueDate:: get requestedDay : {}", openingDays.getRequestedDay());
       log.info("calculateDueDate:: requestedDay : {}, zone: {}", requestedDate, zone);
-      var res = atEndOfDay(requestedDate.withZoneSameInstant(zone), zone);
+      var res = atEndOfDay(requestedDate.withZoneSameInstant(zone));
       log.info("calculateDueDate:: res: {}", res);
       return succeeded(res);
     }
