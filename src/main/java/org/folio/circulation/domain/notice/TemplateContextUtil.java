@@ -432,7 +432,7 @@ public class TemplateContextUtil {
         throw new IllegalArgumentException("Not a valid country code to determine the country name.");
       }
 
-      return new Locale("",code).getDisplayName();
+      return new Locale("",code).getDisplayCountry();
     }
 
     public UserContext withPrimaryAddressProperties(JsonObject address) {
