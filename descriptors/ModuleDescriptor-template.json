@@ -693,8 +693,8 @@
           "modulePermissions": [
             "circulation-storage.circulation-rules.get"
           ],
-          "unit": "minute",
-          "delay": "3"
+          "unit": "second",
+          "delay": "10"
         },
         {
           "methods": [
