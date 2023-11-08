@@ -163,6 +163,8 @@ public class CirculationVerticle extends AbstractVerticle {
           startFuture.fail(result.cause());
         }
       });
+
+
   }
 
   @Override
