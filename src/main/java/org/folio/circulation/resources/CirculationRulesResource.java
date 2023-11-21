@@ -101,8 +101,8 @@ public class CirculationRulesResource extends Resource {
               return;
             }
             JsonObject circulationRules = new JsonObject(response.getBody());
-            CirculationRulesCache.getInstance()
-              .buildRules(context.getTenantId(), circulationRules.getString("rulesAsText"));
+//            CirculationRulesCache.getInstance()
+//              .buildRules(context.getTenantId(), circulationRules.getString("rulesAsText"));
 
             context.write(ok(circulationRules));
           }
@@ -158,8 +158,8 @@ public class CirculationRulesResource extends Resource {
 
     clients.circulationRulesStorage().put(rulesInput.copy())
       .thenApply(this::failWhenResponseOtherThanNoContent)
-      .thenApply(result -> result.map(response -> CirculationRulesCache.getInstance()
-        .buildRules(webContext.getTenantId(), rulesAsText)))
+//      .thenApply(result -> result.map(response -> CirculationRulesCache.getInstance()
+//        .buildRules(webContext.getTenantId(), rulesAsText)))
       .thenApply(result -> result.map(response -> noContent()))
       .thenAccept(webContext::writeResultToHttpResponse);
   }
