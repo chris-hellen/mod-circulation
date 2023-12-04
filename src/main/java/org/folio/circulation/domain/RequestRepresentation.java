@@ -34,6 +34,8 @@ public class RequestRepresentation {
     addAdditionalServicePointProperties(requestRepresentation, request.getPickupServicePoint());
     addDeliveryAddress(requestRepresentation, request, request.getRequester());
 
+    log.info("Extended request representation: {}", requestRepresentation);
+
     return requestRepresentation;
   }
 

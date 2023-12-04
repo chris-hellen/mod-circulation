@@ -27,6 +27,7 @@ import static org.folio.circulation.support.results.Result.of;
 import static org.folio.circulation.support.results.Result.ofAsync;
 import static org.folio.circulation.support.results.Result.succeeded;
 
+import io.vertx.core.json.JsonObject;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Map;
@@ -71,6 +72,8 @@ public class CreateRequestService {
 
   public CompletableFuture<Result<RequestAndRelatedRecords>> createRequest(
     RequestAndRelatedRecords requestAndRelatedRecords) {
+
+    log.info("Create request from initial request and related records...");
 
     final var requestRepository = repositories.getRequestRepository();
     final var configurationRepository = repositories.getConfigurationRepository();

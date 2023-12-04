@@ -21,6 +21,8 @@ import static org.folio.circulation.support.results.Result.of;
 import static org.folio.circulation.support.results.Result.ofAsync;
 import static org.folio.circulation.support.results.Result.succeeded;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.lang.invoke.MethodHandles;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -115,6 +117,8 @@ public class RequestByInstanceIdResource extends Resource {
     final var eventPublisher = new EventPublisher(routingContext);
 
     final var requestBody = routingContext.getBodyAsJson();
+
+    log.info("Creating instance level request...");
 
     new ConfigurationRepository(clients).lookupTlrSettings()
       .thenCompose(r -> r.after(config -> buildAndPlaceRequests(clients, eventPublisher,
@@ -231,6 +235,13 @@ public class RequestByInstanceIdResource extends Resource {
     Clients clients, EventPublisher eventPublisher, RequestRelatedRepositories repositories,
     ItemByInstanceIdFinder itemFinder, TlrSettingsConfiguration tlrConfig, JsonObject requestBody) {
 
+    ObjectMapper om = new ObjectMapper();
+    try {
+      log.info("Config tlr settings: {}", om.writeValueAsString(tlrConfig));
+    } catch (JsonProcessingException e) {
+      log.error("Cannot parse tlrConfig object");
+    }
+
     return buildRequests(requestBody, tlrConfig, itemFinder, repositories)
       .thenCompose(r -> r.after(requests -> placeRequests(clients, eventPublisher, repositories,
         itemFinder, requests)));
@@ -239,6 +250,8 @@ public class RequestByInstanceIdResource extends Resource {
   private CompletableFuture<Result<List<JsonObject>>> buildRequests(
     JsonObject requestBody, TlrSettingsConfiguration tlrConfig, ItemByInstanceIdFinder itemFinder,
     RequestRelatedRepositories repositories) {
+
+    log.info("Building request for place hold...");
 
     return tlrConfig.isTitleLevelRequestsFeatureEnabled()
       ? buildTitleLevelRequests(requestBody)
@@ -296,11 +309,13 @@ public class RequestByInstanceIdResource extends Resource {
     List<JsonObject> itemRequests, int startIndex, CreateRequestService createRequestService,
     Clients clients, List<String> errors, RequestRelatedRepositories repositories) {
 
-    log.debug("RequestByInstanceIdResource.placeRequest, startIndex={}, itemRequestSize={}",
+    log.info("RequestByInstanceIdResource.placeRequest, startIndex={}, itemRequestSize={}",
       startIndex, itemRequests.size());
 
     if (startIndex >= itemRequests.size()) {
       String aggregateFailures = String.format("%n%s", String.join("%n", errors));
+
+      log.error("Failed to place a request for the instance. Reasons: {}", aggregateFailures);
 
       return CompletableFuture.completedFuture(failedDueToServerError(
         "Failed to place a request for the instance. Reasons: " + aggregateFailures));
@@ -316,18 +331,23 @@ public class RequestByInstanceIdResource extends Resource {
         new ItemByInstanceIdFinder(clients.holdingsStorage(), repositories.getItemRepository()),
         ItemForTlrService.using(repositories));
 
+    log.info("Current item request: {}", currentItemRequest);
+
     return requestFromRepresentationService.getRequestFrom(currentItemRequest)
       .thenCompose(r -> r.after(createRequestService::createRequest))
       .thenCompose(r -> {
           if (r.succeeded()) {
-            log.debug("RequestByInstanceIdResource.placeRequest: succeeded creating request for item {}",
+            log.info("RequestByInstanceIdResource.placeRequest: succeeded creating request for item {}",
                 currentItemRequest.getString(ITEM_ID));
             return CompletableFuture.completedFuture(r);
           } else {
             String reason = getErrorMessage(r.cause());
+
+            log.error("Error during creating request: {}", reason);
+
             errors.add(reason);
 
-            log.debug("Failed to create request for item {} with reason: {}", currentItemRequest.getString(ITEM_ID), reason);
+            log.info("Failed to create request for item {} with reason: {}", currentItemRequest.getString(ITEM_ID), reason);
             return placeRequest(itemRequests, startIndex +1,
               createRequestService, clients, errors, repositories);
           }
