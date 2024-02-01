@@ -171,10 +171,11 @@ public class ItemRepository {
     Result<MultipleRecords<Item>> result) {
 
     return result.after(items ->
-      materialTypeRepository.getMaterialTypes(items)
-        .thenApply(mapResult(materialTypes -> items.combineRecords(materialTypes,
-          matchRecordsById(Item::getMaterialTypeId, MaterialType::getId),
-          Item::withMaterialType, MaterialType.unknown()))));
+      supplyAsync(() -> materialTypeRepository.getMaterialTypes(items))
+        .thenCompose(materialTypes -> materialTypes.thenApplyAsync(
+          mapResult(multipleRecords -> items.combineRecords(multipleRecords,
+            matchRecordsById(Item::getMaterialTypeId, MaterialType::getId),
+            Item::withMaterialType, MaterialType.unknown())))));
   }
 
   private CompletableFuture<Result<MultipleRecords<Item>>> fetchLoanTypes(
@@ -183,10 +184,11 @@ public class ItemRepository {
     return result.after(items -> {
       final var loanTypeIdsToFetch = items.toKeys(Item::getLoanTypeId);
 
-      return loanTypeRepository.findByIds(loanTypeIdsToFetch)
-        .thenApply(mapResult(loanTypes -> items.combineRecords(loanTypes,
+      return supplyAsync(() -> loanTypeRepository.findByIds(loanTypeIdsToFetch))
+        .thenCompose(loanTypes -> loanTypes.thenApplyAsync(
+          mapResult(multipleRecords -> items.combineRecords(multipleRecords,
           matchRecordsById(Item::getLoanTypeId, LoanType::getId),
-          Item::withLoanType, LoanType.unknown())));
+          Item::withLoanType, LoanType.unknown()))));
     });
   }
 
@@ -196,10 +198,11 @@ public class ItemRepository {
     return result.after(items -> {
       final var instanceIds = items.toKeys(Item::getInstanceId);
 
-      return instanceRepository.fetchByIds(instanceIds)
-        .thenApply(mapResult(instances -> items.combineRecords(instances,
-          matchRecordsById(Item::getInstanceId, Instance::getId),
-          Item::withInstance, Instance.unknown())));
+      return supplyAsync(() -> instanceRepository.fetchByIds(instanceIds))
+        .thenCompose(instances -> instances.thenApplyAsync(
+          mapResult(multipleRecords -> items.combineRecords(multipleRecords,
+            matchRecordsById(Item::getInstanceId, Instance::getId),
+            Item::withInstance, Instance.unknown()))));
     });
   }
 
