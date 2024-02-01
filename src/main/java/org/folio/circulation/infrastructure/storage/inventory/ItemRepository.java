@@ -1,6 +1,7 @@
 package org.folio.circulation.infrastructure.storage.inventory;
 
 import static java.util.concurrent.CompletableFuture.completedFuture;
+import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static java.util.function.Function.identity;
 import static org.folio.circulation.domain.ItemStatus.AVAILABLE;
 import static org.folio.circulation.domain.MultipleRecords.CombinationMatchers.matchRecordsById;
@@ -208,10 +209,12 @@ public class ItemRepository {
     return result.after(items -> {
       final var holdingsIds = items.toKeys(Item::getHoldingsRecordId);
 
-      return holdingsRepository.fetchByIds(holdingsIds)
-        .thenApply(mapResult(holdings -> items.combineRecords(holdings,
-          matchRecordsById(Item::getHoldingsRecordId, Holdings::getId),
-          Item::withHoldings, Holdings.unknown())));
+      return supplyAsync(() -> holdingsRepository.fetchByIds(holdingsIds)
+        .thenApplyAsync(mapResult(holdings ->
+          items.combineRecords(holdings,
+            matchRecordsById(Item::getHoldingsRecordId, Holdings::getId),
+            Item::withHoldings, Holdings.unknown()))))
+        .thenCompose(Function.identity());
     });
   }
 
