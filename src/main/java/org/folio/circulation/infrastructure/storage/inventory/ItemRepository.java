@@ -209,12 +209,11 @@ public class ItemRepository {
     return result.after(items -> {
       final var holdingsIds = items.toKeys(Item::getHoldingsRecordId);
 
-      return supplyAsync(() -> holdingsRepository.fetchByIds(holdingsIds)
-        .thenApplyAsync(mapResult(holdings ->
-          items.combineRecords(holdings,
+      return supplyAsync(() -> holdingsRepository.fetchByIds(holdingsIds))
+        .thenCompose(holdings -> holdings.thenApplyAsync(
+          mapResult(multipleRecords -> items.combineRecords(multipleRecords,
             matchRecordsById(Item::getHoldingsRecordId, Holdings::getId),
-            Item::withHoldings, Holdings.unknown()))))
-        .thenCompose(Function.identity());
+            Item::withHoldings, Holdings.unknown()))));
     });
   }
 
