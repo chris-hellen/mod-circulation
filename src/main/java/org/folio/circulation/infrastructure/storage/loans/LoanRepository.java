@@ -76,6 +76,7 @@ import io.vertx.core.json.JsonObject;
 public class LoanRepository implements GetManyRecordsRepository<Loan> {
   private static final String RECORDS_PROPERTY_NAME = "loans";
   public static final String DUE_DATE_CHANGED_BY_HOLD = "dueDateChangedByHold";
+  private static final String IS_DCB = "isDcb";
 
   private final CollectionResourceClient loansStorageClient;
   private final ItemRepository itemRepository;
@@ -294,8 +295,19 @@ public class LoanRepository implements GetManyRecordsRepository<Loan> {
     return MultipleRecords.from(response, Loan::from, RECORDS_PROPERTY_NAME);
   }
 
+  private static void addIsDcbProperty(Loan loan, Item item, JsonObject storageLoan) {
+    log.info("addIsDcbProperty called");
+    if ((nonNull(loan.getUser()) && nonNull(loan.getUser().getLastName())
+      && loan.getUser().getLastName().equalsIgnoreCase("DcbSystem"))
+      || item.isDcbItem()) {
+      log.info("Inside the dcb case");
+      write(storageLoan, IS_DCB, true);
+    }
+  }
+
+
   private static JsonObject mapToStorageRepresentation(Loan loan, Item item) {
-    log.debug("mapToStorageRepresentation:: parameters loan: {}, item: {}", loan, item);
+    log.info("mapToStorageRepresentation:: parameters loan: {}, item: {}", loan, item);
     JsonObject storageLoan = loan.asJson();
 
     keepPatronGroupIdAtCheckoutProperties(loan, storageLoan);
@@ -307,6 +319,7 @@ public class LoanRepository implements GetManyRecordsRepository<Loan> {
     removeProperty(storageLoan, FEESANDFINES);
     removeProperty(storageLoan, OVERDUE_FINE_POLICY);
     removeProperty(storageLoan, LOST_ITEM_POLICY);
+    addIsDcbProperty(loan, item, storageLoan);
 
     updatePolicy(storageLoan, loan.getLoanPolicy(), "loanPolicyId");
     updatePolicy(storageLoan, loan.getOverdueFinePolicy(), "overdueFinePolicyId");
