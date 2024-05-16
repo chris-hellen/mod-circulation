@@ -32,10 +32,10 @@ public class SearchRepository {
     this(new ItemRepository(clients), clients.searchClient());
   }
 
-  public CompletableFuture<Result<InstanceExtended>> getInstanceWithItems(String instanceId) {
-    log.debug("getInstanceWithItems:: instanceId {}", instanceId);
+  public CompletableFuture<Result<InstanceExtended>> getInstanceWithItems(String query) {
+    log.debug("getInstanceWithItems:: query {}", query);
     return searchClient.getManyWithQueryStringParameters(Map.of("expandAll",
-        "true", "query", String.format("id==%s", instanceId)))
+        "true", "query", query))
       .thenApply(flatMapResult(this::mapResponseToInstances))
       .thenApply(mapResult(MultipleRecords::firstOrNull))
       .thenCompose(r -> r.after(this::updateItemDetails));
