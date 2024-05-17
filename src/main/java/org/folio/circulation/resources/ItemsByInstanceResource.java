@@ -32,9 +32,8 @@ public class ItemsByInstanceResource extends Resource {
     final Clients clients = Clients.create(context, client);
     List<String> queryParams = routingContext.queryParam("query");
     if (!queryParams.isEmpty()) {
-      String query = queryParams.get(0);
       final var searchRepository = new SearchRepository(clients);
-      searchRepository.getInstanceWithItems(query)
+      searchRepository.getInstanceWithItems(queryParams.get(0))
         .thenApply(r -> r.map(this::toJson))
         .thenApply(r -> r.map(JsonHttpResponse::ok))
         .thenAccept(context::writeResultToHttpResponse);

@@ -13,6 +13,7 @@ import org.folio.circulation.support.CollectionResourceClient;
 import org.folio.circulation.support.http.client.Response;
 import org.folio.circulation.support.results.Result;
 import java.lang.invoke.MethodHandles;
+import java.net.URLEncoder;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import static org.folio.circulation.support.results.Result.emptyAsync;
@@ -35,7 +36,8 @@ public class SearchRepository {
   public CompletableFuture<Result<InstanceExtended>> getInstanceWithItems(String query) {
     log.debug("getInstanceWithItems:: query {}", query);
     return searchClient.getManyWithQueryStringParameters(Map.of("expandAll",
-        "true", "query", query))
+        "true", "query", URLEncoder.encode(query,
+          java.nio.charset.StandardCharsets.UTF_8)))
       .thenApply(flatMapResult(this::mapResponseToInstances))
       .thenApply(mapResult(MultipleRecords::firstOrNull))
       .thenCompose(r -> r.after(this::updateItemDetails));
