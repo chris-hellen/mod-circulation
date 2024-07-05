@@ -4,7 +4,9 @@ import java.net.MalformedURLException;
 
 import org.folio.circulation.rules.CirculationRulesProcessor;
 import org.folio.circulation.services.PubSubPublishingService;
+import org.folio.circulation.support.http.client.IncludeRoutingServicePoints;
 import org.folio.circulation.support.http.client.OkapiHttpClient;
+import org.folio.circulation.support.http.client.QueryParameter;
 import org.folio.circulation.support.http.server.WebContext;
 
 import io.vertx.core.http.HttpClient;
@@ -40,6 +42,7 @@ public class Clients {
   private final CollectionResourceClient circulationRulesStorageClient;
   private final CollectionResourceClient requestPoliciesStorageClient;
   private final CollectionResourceClient servicePointsStorageClient;
+  private final CollectionResourceClient routingServicePointsStorageClient;
   private final CollectionResourceClient calendarStorageClient;
   private final CollectionResourceClient patronGroupsStorageClient;
   private final CollectionResourceClient patronNoticePolicesStorageClient;
@@ -68,11 +71,16 @@ public class Clients {
   private final CollectionResourceClient departmentClient;
   private final CollectionResourceClient checkOutLockStorageClient;
   private final CollectionResourceClient circulationItemClient;
+  private final CollectionResourceClient searchClient;
   private final GetManyRecordsClient settingsStorageClient;
   private final CollectionResourceClient circulationSettingsStorageClient;
 
   public static Clients create(WebContext context, HttpClient httpClient) {
     return new Clients(context.createHttpClient(httpClient), context);
+  }
+
+  public static Clients create(WebContext context, HttpClient httpClient, String tenantId) {
+    return new Clients(context.createHttpClient(httpClient, tenantId), context);
   }
 
   private Clients(OkapiHttpClient client, WebContext context) {
@@ -108,6 +116,8 @@ public class Clients {
       requestPoliciesStorageClient = createRequestPoliciesStorageClient(client, context);
       fixedDueDateSchedulesStorageClient = createFixedDueDateSchedulesStorageClient(client, context);
       servicePointsStorageClient = createServicePointsStorageClient(client, context);
+      routingServicePointsStorageClient = createServicePointsStorageWithCustomParam(client,
+        context, IncludeRoutingServicePoints.enabled());
       patronGroupsStorageClient = createPatronGroupsStorageClient(client, context);
       calendarStorageClient = createCalendarStorageClient(client, context);
       patronNoticePolicesStorageClient = createPatronNoticePolicesStorageClient(client, context);
@@ -137,6 +147,7 @@ public class Clients {
       checkOutLockStorageClient = createCheckoutLockClient(client, context);
       settingsStorageClient = createSettingsStorageClient(client, context);
       circulationItemClient = createCirculationItemClient(client, context);
+      searchClient = createSearchClient(client, context);
       circulationSettingsStorageClient = createCirculationSettingsStorageClient(client, context);
     }
     catch(MalformedURLException e) {
@@ -238,6 +249,10 @@ public class Clients {
 
   public CollectionResourceClient servicePointsStorage() {
     return servicePointsStorageClient;
+  }
+
+  public CollectionResourceClient routingServicePointsStorage() {
+    return routingServicePointsStorageClient;
   }
 
   public CollectionResourceClient patronGroupsStorage() {
@@ -376,6 +391,10 @@ public class Clients {
     return circulationItemClient;
   }
 
+  public CollectionResourceClient searchClient() {
+    return searchClient;
+  }
+
   public CollectionResourceClient circulationSettingsStorageClient() {
     return circulationSettingsStorageClient;
   }
@@ -386,6 +405,14 @@ public class Clients {
     throws MalformedURLException {
 
     return new CollectionResourceClient(client, context.getOkapiBasedUrl(path));
+  }
+
+  private static CollectionResourceClient getCollectionResourceClientWithCustomParam(
+    OkapiHttpClient client, WebContext context, String path, QueryParameter customParam)
+    throws MalformedURLException {
+
+    return new CustomParamCollectionResourceClient(client, context.getOkapiBasedUrl(path),
+      customParam);
   }
 
   public CollectionResourceClient noticeTemplatesClient() {
@@ -630,6 +657,14 @@ public class Clients {
     return getCollectionResourceClient(client, context, "/service-points");
   }
 
+  private CollectionResourceClient createServicePointsStorageWithCustomParam(
+    OkapiHttpClient client, WebContext context, QueryParameter customParam)
+      throws MalformedURLException {
+
+    return getCollectionResourceClientWithCustomParam(client, context, "/service-points",
+      customParam);
+  }
+
   private CollectionResourceClient createPatronGroupsStorageClient(
     OkapiHttpClient client, WebContext context)
       throws MalformedURLException {
@@ -805,6 +840,12 @@ public class Clients {
     OkapiHttpClient client, WebContext context) throws MalformedURLException {
 
     return  getCollectionResourceClient(client, context, "/circulation-item");
+  }
+
+  private CollectionResourceClient createSearchClient(
+    OkapiHttpClient client, WebContext context) throws MalformedURLException {
+
+    return  getCollectionResourceClient(client, context, "/search/instances");
   }
 
   private CollectionResourceClient createCirculationSettingsStorageClient(

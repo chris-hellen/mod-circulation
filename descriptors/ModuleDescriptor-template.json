@@ -132,8 +132,7 @@
           "methods": ["POST"],
           "pathPattern": "/circulation/loans/{id}/change-due-date",
           "permissionsRequired": [
-            "circulation.loans.change-due-date.post",
-            "configuration.entries.collection.get"
+            "circulation.loans.change-due-date.post"
           ],
           "modulePermissions": [
             "modperms.circulation.loans.change-due-date.post"
@@ -163,6 +162,22 @@
           ],
           "modulePermissions": [
             "modperms.circulation.loans.declare-claimed-returned-item-as-missing.post"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "instance-items",
+      "version": "0.1",
+      "handlers": [
+        {
+          "methods": ["GET"],
+          "pathPattern": "/circulation/items-by-instance",
+          "permissionsRequired": [
+            "circulation.items-by-instance.get"
+          ],
+          "modulePermissions": [
+            "search.instances.collection.get"
           ]
         }
       ]
@@ -649,7 +664,7 @@
     },
     {
       "id": "allowed-service-points",
-      "version": "1.0",
+      "version": "1.2",
       "handlers": [
         {
           "methods": [
@@ -677,7 +692,10 @@
             "inventory-storage.instances.item.get",
             "inventory-storage.instances.collection.get",
             "configuration.entries.item.get",
-            "configuration.entries.collection.get"
+            "configuration.entries.collection.get",
+            "mod-settings.entries.item.get",
+            "mod-settings.entries.collection.get",
+            "mod-settings.global.read.circulation"
           ]
         }
       ]
@@ -1578,6 +1596,11 @@
       "description": "To read the configuration from mod settings."
     },
     {
+      "permissionName": "circulation.items-by-instance.get",
+      "displayName": "circulation - get items by instance",
+      "description": "get items by instance"
+    },
+    {
       "permissionName": "circulation.settings.collection.get",
       "displayName": "circulation - get circulation settings",
       "description": "get a collection of circulation settings"
@@ -1643,7 +1666,8 @@
         "circulation.requests.allowed-service-points.get",
         "circulation.inventory.items-in-transit-report.get",
         "circulation.pick-slips.get",
-        "circulation.search-slips.get"
+        "circulation.search-slips.get",
+        "circulation.items-by-instance.get"
       ]
     },
     {
@@ -1747,6 +1771,9 @@
         "proxiesfor.collection.get",
         "patron-notice.post",
         "configuration.entries.collection.get",
+        "mod-settings.entries.item.get",
+        "mod-settings.entries.collection.get",
+        "mod-settings.global.read.circulation",
         "calendar.endpoint.dates.get",
         "pubsub.publish.post",
         "circulation-storage.loans-history.collection.get"
@@ -1800,7 +1827,8 @@
         "checkout-lock-storage.checkout-locks.item.delete",
         "mod-settings.entries.collection.get",
         "mod-settings.entries.item.get",
-        "mod-settings.global.read.mod-circulation"
+        "mod-settings.global.read.mod-circulation",
+        "mod-settings.global.read.circulation"
       ],
       "visible": false
     },
@@ -1861,7 +1889,10 @@
         "actual-cost-fee-fine-cancel.post",
         "departments.item.get",
         "departments.collection.get",
-        "circulation-storage.loans-history.collection.get"
+        "circulation-storage.loans-history.collection.get",
+        "mod-settings.entries.item.get",
+        "mod-settings.entries.collection.get",
+        "mod-settings.global.read.circulation"
       ],
       "visible": false
     },
@@ -1893,6 +1924,9 @@
         "proxiesfor.collection.get",
         "calendar.endpoint.dates.get",
         "configuration.entries.collection.get",
+        "mod-settings.entries.item.get",
+        "mod-settings.entries.collection.get",
+        "mod-settings.global.read.circulation",
         "scheduled-notice-storage.scheduled-notices.collection.delete",
         "scheduled-notice-storage.scheduled-notices.item.post",
         "patron-notice.post",
@@ -2077,6 +2111,9 @@
         "scheduled-notice-storage.scheduled-notices.collection.delete",
         "scheduled-notice-storage.scheduled-notices.item.post",
         "configuration.entries.collection.get",
+        "mod-settings.entries.item.get",
+        "mod-settings.entries.collection.get",
+        "mod-settings.global.read.circulation",
         "manualblocks.collection.get",
         "pubsub.publish.post",
         "automated-patron-blocks.collection.get",
@@ -2157,6 +2194,9 @@
         "proxiesfor.collection.get",
         "patron-notice.post",
         "configuration.entries.collection.get",
+        "mod-settings.entries.item.get",
+        "mod-settings.entries.collection.get",
+        "mod-settings.global.read.circulation",
         "scheduled-notice-storage.scheduled-notices.collection.delete",
         "scheduled-notice-storage.scheduled-notices.item.post",
         "pubsub.publish.post",
@@ -2200,7 +2240,10 @@
         "addresstypes.collection.get",
         "usergroups.collection.get",
         "usergroups.item.get",
-        "pubsub.publish.post"
+        "pubsub.publish.post",
+        "mod-settings.entries.item.get",
+        "mod-settings.entries.collection.get",
+        "mod-settings.global.read.circulation"
       ],
       "visible": false
     },
@@ -2235,6 +2278,9 @@
         "patron-notice.post",
         "calendar.endpoint.dates.get",
         "configuration.entries.collection.get",
+        "mod-settings.entries.item.get",
+        "mod-settings.entries.collection.get",
+        "mod-settings.global.read.circulation",
         "scheduled-notice-storage.scheduled-notices.collection.delete",
         "scheduled-notice-storage.scheduled-notices.item.post",
         "manualblocks.collection.get",
@@ -2293,7 +2339,10 @@
         "addresstypes.collection.get",
         "pubsub.publish.post",
         "patron-notice.post",
-        "circulation-storage.loans-history.collection.get"
+        "circulation-storage.loans-history.collection.get",
+        "mod-settings.entries.item.get",
+        "mod-settings.entries.collection.get",
+        "mod-settings.global.read.circulation"
       ],
       "visible": false
     },

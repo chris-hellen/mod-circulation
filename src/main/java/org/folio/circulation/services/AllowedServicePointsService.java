@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -40,8 +41,8 @@ import org.folio.circulation.domain.RequestTypeItemStatusWhiteList;
 import org.folio.circulation.domain.User;
 import org.folio.circulation.domain.configuration.TlrSettingsConfiguration;
 import org.folio.circulation.domain.policy.RequestPolicy;
-import org.folio.circulation.infrastructure.storage.ConfigurationRepository;
 import org.folio.circulation.infrastructure.storage.ServicePointRepository;
+import org.folio.circulation.infrastructure.storage.SettingsRepository;
 import org.folio.circulation.infrastructure.storage.inventory.InstanceRepository;
 import org.folio.circulation.infrastructure.storage.inventory.ItemRepository;
 import org.folio.circulation.infrastructure.storage.requests.RequestPolicyRepository;
@@ -57,24 +58,28 @@ import org.folio.circulation.support.results.Result;
 
 public class AllowedServicePointsService {
   private static final Logger log = LogManager.getLogger(MethodHandles.lookup().lookupClass());
+  private static final String ECS_REQUEST_ROUTING_INDEX_NAME = "ecsRequestRouting";
+  private static final String PICKUP_LOCATION_INDEX_NAME = "pickupLocation";
   private final ItemRepository itemRepository;
   private final UserRepository userRepository;
   private final RequestRepository requestRepository;
   private final RequestPolicyRepository requestPolicyRepository;
   private final ServicePointRepository servicePointRepository;
   private final ItemByInstanceIdFinder itemFinder;
-  private final ConfigurationRepository configurationRepository;
+  private final SettingsRepository settingsRepository;
   private final InstanceRepository instanceRepository;
+  private final String indexName;
 
-  public AllowedServicePointsService(Clients clients) {
+  public AllowedServicePointsService(Clients clients, boolean isEcsRequestRouting) {
     itemRepository = new ItemRepository(clients);
     userRepository = new UserRepository(clients);
     requestRepository = new RequestRepository(clients);
     requestPolicyRepository = new RequestPolicyRepository(clients);
-    servicePointRepository = new ServicePointRepository(clients);
-    configurationRepository = new ConfigurationRepository(clients);
+    servicePointRepository = new ServicePointRepository(clients, isEcsRequestRouting);
+    settingsRepository = new SettingsRepository(clients);
     instanceRepository = new InstanceRepository(clients);
     itemFinder = new ItemByInstanceIdFinder(clients.holdingsStorage(), itemRepository);
+    indexName = isEcsRequestRouting ? ECS_REQUEST_ROUTING_INDEX_NAME : PICKUP_LOCATION_INDEX_NAME;
   }
 
   public CompletableFuture<Result<Map<RequestType, Set<AllowedServicePoint>>>>
@@ -154,6 +159,12 @@ public class AllowedServicePointsService {
       ? this::extractAllowedServicePointsIgnoringItemStatus
       : this::extractAllowedServicePointsConsideringItemStatus;
 
+    if (request.isUseStubItem()) {
+      return requestPolicyRepository.lookupRequestPolicy(user)
+        .thenCompose(r -> r.after(policy -> extractAllowedServicePointsIgnoringItemStatus(
+          policy, new HashSet<>())));
+    }
+
     return requestPolicyRepository.lookupRequestPolicies(items, user)
       .thenCompose(r -> r.after(policies -> allOf(policies, mappingFunction)))
       .thenApply(r -> r.map(this::combineAllowedServicePoints));
@@ -165,7 +176,7 @@ public class AllowedServicePointsService {
 
     if (request.isForTitleLevelRequest() && request.getOperation() == CREATE) {
       log.info("getAllowedServicePointsForTitleWithNoItems:: checking TLR settings");
-      return configurationRepository.lookupTlrSettings()
+      return settingsRepository.lookupTlrSettings()
         .thenCompose(r -> r.after(this::considerTlrSettings));
     }
 
@@ -353,7 +364,7 @@ public class AllowedServicePointsService {
   }
 
   private CompletableFuture<Result<Set<AllowedServicePoint>>> fetchAllowedServicePoints() {
-    return servicePointRepository.fetchPickupLocationServicePoints()
+    return servicePointRepository.fetchServicePointsByIndexName(indexName)
       .thenApply(r -> r.map(servicePoints -> servicePoints.stream()
         .map(AllowedServicePoint::new)
         .collect(Collectors.toSet())));
@@ -365,7 +376,7 @@ public class AllowedServicePointsService {
     log.debug("filterIdsByServicePointsAndPickupLocationExistence:: parameters ids: {}",
       () -> collectionAsString(ids));
 
-    return servicePointRepository.fetchPickupLocationServicePointsByIds(ids)
+    return servicePointRepository.fetchPickupLocationServicePointsByIdsAndIndexName(ids, indexName)
       .thenApply(servicePointsResult -> servicePointsResult
         .map(servicePoints -> servicePoints.stream()
           .map(AllowedServicePoint::new)
