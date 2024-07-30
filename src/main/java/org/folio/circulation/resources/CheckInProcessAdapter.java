@@ -169,11 +169,12 @@ class CheckInProcessAdapter {
     boolean tlrEnabled = context.getTlrSettings().isTitleLevelRequestsFeatureEnabled();
     log.info("getRequestQueue:: tlrEnabled: {}", tlrEnabled);
 
+    Item item = context.getItem();
     if (!tlrEnabled) {
-      return requestQueueRepository.getByItemId(context.getItem().getItemId());
+      return requestQueueRepository.getByItemId(item.getItemId());
     }
     else {
-      return requestQueueRepository.getByInstanceId(context.getItem().getInstanceId());
+      return requestQueueRepository.getByInstanceAndItemId(item.getInstanceId(), item.getItemId());
     }
   }
 

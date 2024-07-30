@@ -14,6 +14,7 @@ import static org.folio.circulation.support.utils.LogUtil.collectionAsString;
 import java.lang.invoke.MethodHandles;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -74,15 +75,32 @@ public class RequestQueueRepository {
     ).thenApply(result -> result.map(context::withRequestQueue));
   }
 
+  public CompletableFuture<Result<RequestQueue>> getByInstanceAndItemId(String instanceId, String itemId) {
+    return get("instanceId", instanceId, List.of(ITEM, TITLE))
+      .thenCompose(r -> r.combineAfter(() -> get("itemId", itemId, List.of(ITEM)), (byInstanceId, byItemId) -> {
+        Collection<Request> result = byInstanceId.getRecords();
+        Map<String, Request> idToRequestByInstance = byInstanceId.toMap(Request::getId);
+        byItemId.getRecords()
+          .stream()
+          .filter(requestByItemId -> !idToRequestByInstance.containsKey(requestByItemId.getId()))
+          .forEach(result::add);
+        return new RequestQueue(result);
+      }));
+  }
+
   public CompletableFuture<Result<RequestQueue>> getByInstanceId(String instanceId) {
-    return get("instanceId", instanceId, List.of(ITEM, TITLE));
+    return get("instanceId", instanceId, List.of(ITEM, TITLE))
+      .thenApply(r -> r.map(MultipleRecords::getRecords))
+      .thenApply(r -> r.map(RequestQueue::new));
   }
 
   public CompletableFuture<Result<RequestQueue>> getByItemId(String itemId) {
-    return get("itemId", itemId, List.of(ITEM));
+    return get("itemId", itemId, List.of(ITEM))
+      .thenApply(r -> r.map(MultipleRecords::getRecords))
+      .thenApply(r -> r.map(RequestQueue::new));
   }
 
-  private CompletableFuture<Result<RequestQueue>> get(String idFieldName, String id,
+  private CompletableFuture<Result<MultipleRecords<Request>>> get(String idFieldName, String id,
     Collection<RequestLevel> requestLevels) {
 
     log.debug("get:: parameters idFieldName: {}, id: {}, requestLevels: {}",
@@ -99,10 +117,7 @@ public class RequestQueueRepository {
     return itemIdQuery.combine(statusQuery, CqlQuery::and)
       .combine(requestLevelQuery, CqlQuery::and)
       .map(q -> q.sortBy(ascending("position")))
-      .after(query -> requestRepository.findBy(query,
-        MAXIMUM_SUPPORTED_REQUEST_QUEUE_SIZE))
-      .thenApply(r -> r.map(MultipleRecords::getRecords))
-      .thenApply(r -> r.map(RequestQueue::new));
+      .after(query -> requestRepository.findBy(query, MAXIMUM_SUPPORTED_REQUEST_QUEUE_SIZE));
   }
 
   public CompletableFuture<Result<RequestQueue>> getRequestQueueWithoutItemLookup(String itemId) {

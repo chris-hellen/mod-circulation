@@ -1855,6 +1855,8 @@
         "circulation.rules.request-policy.get",
         "inventory-storage.items.item.put",
         "circulation-item.item.put",
+        "circulation-item.item.get",
+        "circulation-item.collection.get",
         "circulation.internal.fetch-items",
         "users.item.get",
         "users.collection.get",
