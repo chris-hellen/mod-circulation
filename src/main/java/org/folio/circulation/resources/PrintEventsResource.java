@@ -1,6 +1,7 @@
 package org.folio.circulation.resources;
 
 import io.vertx.core.http.HttpClient;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import org.apache.logging.log4j.LogManager;
@@ -61,7 +62,7 @@ public class PrintEventsResource extends Resource {
       .thenCompose(r -> r.after(validatePrintEventFeatureFlag(circulationSettingsRepository)))
       .thenCompose(r -> r.after(validateRequests(requestRepository)))
       .thenCompose(r -> r.after(printEventsRepository::create))
-      .thenApply(r -> r.map(response -> JsonHttpResponse.created(null, null)))
+      .thenApply(r -> r.map(response -> JsonHttpResponse.created(new JsonObject(), null)))
       .thenAccept(context::writeResultToHttpResponse);
   }
 
