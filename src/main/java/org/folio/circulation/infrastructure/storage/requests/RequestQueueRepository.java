@@ -77,7 +77,7 @@ public class RequestQueueRepository {
 
   public CompletableFuture<Result<RequestQueue>> getByInstanceAndItemId(String instanceId, String itemId) {
     return get("instanceId", instanceId, List.of(ITEM, TITLE))
-      .thenCompose(r -> r.combineAfter(() -> get("itemId", itemId, List.of(ITEM)), (byInstanceId, byItemId) -> {
+      .thenCompose(r -> r.combineAfter(() -> get("itemId", itemId, List.of(ITEM, TITLE)), (byInstanceId, byItemId) -> {
         Collection<Request> result = byInstanceId.getRecords();
         Map<String, Request> idToRequestByInstance = byInstanceId.toMap(Request::getId);
         byItemId.getRecords()
