@@ -84,6 +84,8 @@ public class RequestQueueRepository {
           .stream()
           .filter(requestByItemId -> !idToRequestByInstance.containsKey(requestByItemId.getId()))
           .forEach(result::add);
+
+        log.info("getByInstanceAndItemId:: requests: {}", result.stream().map(Request::getId).toList());
         return new RequestQueue(result);
       }));
   }
