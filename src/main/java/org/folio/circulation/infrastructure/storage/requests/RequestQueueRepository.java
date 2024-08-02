@@ -50,12 +50,27 @@ public class RequestQueueRepository {
       .thenApply(mapResult(records::withRequestQueue));
   }
 
+  public CompletableFuture<Result<LoanAndRelatedRecords>> getQueueForCheckOut(LoanAndRelatedRecords records) {
+    log.debug("get:: parameters loanAndRelatedRecords: {}", records);
+    Item item = records.getItem();
+    return getQueueForCheckOut(records.getTlrSettings(), item.getInstanceId(), item.getItemId())
+      .thenApply(mapResult(records::withRequestQueue));
+  }
+
   public CompletableFuture<Result<RequestAndRelatedRecords>> get(RequestAndRelatedRecords records) {
     log.debug("get:: parameters requestAndRelatedRecords: {}", records);
     Request request = records.getRequest();
 
     return getQueue(request.getTlrSettingsConfiguration(), request.getInstanceId(), request.getItemId())
       .thenApply(mapResult(records::withRequestQueue));
+  }
+
+  public CompletableFuture<Result<RequestQueue>> getQueueForCheckOut(TlrSettingsConfiguration tlrSettings,
+    String instanceId, String itemId) {
+
+    return tlrSettings != null && tlrSettings.isTitleLevelRequestsFeatureEnabled()
+      ? getByInstanceAndItemId(instanceId, itemId)
+      : getByItemId(itemId);
   }
 
   public CompletableFuture<Result<RequestQueue>> getQueue(TlrSettingsConfiguration tlrSettings,
