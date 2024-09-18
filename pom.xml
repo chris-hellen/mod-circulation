@@ -21,6 +21,13 @@
       <url>https://jitpack.io</url>
     </repository>
   </repositories>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>folio-nexus</id>
+      <name>FOLIO Maven repository</name>
+      <url>https://repository.folio.org/repository/maven-folio</url>
+    </pluginRepository>
+  </pluginRepositories>
 
   <properties>
     <antlr4.version>4.11.1</antlr4.version>
@@ -33,6 +40,7 @@
     <lombok.version>1.18.28</lombok.version>
     <spring.version>6.1.5</spring.version>
     <maven.site.plugin.version>3.9.1</maven.site.plugin.version>
+    <folio-module-descriptor-validator.version>1.0.0</folio-module-descriptor-validator.version>
   </properties>
 
   <dependencyManagement>
@@ -325,6 +333,18 @@
       </plugins>
     </pluginManagement>
     <plugins>
+      <plugin>
+        <groupId>org.folio</groupId>
+        <artifactId>folio-module-descriptor-validator</artifactId>
+        <version>${folio-module-descriptor-validator.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>validate</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-site-plugin</artifactId>
