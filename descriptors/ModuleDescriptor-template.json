@@ -184,7 +184,7 @@
     },
     {
       "id": "circulation",
-      "version": "14.4",
+      "version": "15.0",
       "handlers": [
         {
           "methods": [
@@ -1600,16 +1600,6 @@
       "permissionName": "circulation.requests.allowed-service-points.get",
       "displayName": "circulation - get allowed pickup service points for request",
       "description": "get allowed pickup service points for request"
-    },
-    {
-      "permissionName": "mod-settings.global.write.mod-circulation",
-      "displayName": "circulation settings - Create configuration",
-      "description": "To create new configuration in mod settings"
-    },
-    {
-      "permissionName": "mod-settings.global.read.mod-circulation",
-      "displayName": "circulation settings - Read configuration",
-      "description": "To read the configuration from mod settings."
     },
     {
       "permissionName": "circulation.settings.collection.get",
